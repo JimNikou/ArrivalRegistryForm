@@ -134,7 +134,7 @@
 
             <TableRow
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" >
+                android:layout_height="178dp">
 
                 <Button
                     android:id="@+id/save_changes_button"
@@ -158,10 +158,11 @@
                 android:layout_height="match_parent" >
 
                 <Button
-                    android:id="@+id/button7"
+                    android:id="@+id/saveChanges"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Save Changes" />
+
             </TableRow>
         </TableLayout>
     </ScrollView>

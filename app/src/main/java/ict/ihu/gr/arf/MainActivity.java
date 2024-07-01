@@ -1,6 +1,7 @@
 package ict.ihu.gr.arf;
 
 import android.os.Bundle;
+import android.os.RemoteException;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -17,9 +18,18 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.ctk.sdk.PosApiHelper;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.sunmi.printerx.PrinterSdk;
+import com.sunmi.printerx.SdkException;
+import com.sunmi.printerx.api.CanvasApi;
+import com.sunmi.printerx.api.PrintResult;
+import com.sunmi.printerx.enums.Shape;
+import com.sunmi.printerx.style.AreaStyle;
+import com.sunmi.printerx.style.BaseStyle;
+import com.sunmi.printerx.style.TextStyle;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Properties;
 
 import javax.mail.Authenticator;
@@ -32,7 +42,6 @@ import javax.mail.internet.MimeMessage;
 
 import ict.ihu.gr.arf.databinding.ActivityMainBinding;
 import ict.ihu.gr.arf.ui.SharedViewModel;
-
 public class MainActivity extends AppCompatActivity {
 
     // shared view model for more info function, used to get the SharedViewModel
@@ -43,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
     public String emailBody;
     private ActivityMainBinding binding;
 
+    public PrinterSdk.Printer sunmiv2sPrinter; // THIS IS FOR PRINTER-POS SUNMI V2S
     String stringHost = "mail.dalamaras.gr";
     String Port = "465";
     String sslEnable = "true";
@@ -85,24 +95,71 @@ public class MainActivity extends AppCompatActivity {
                 getData(stringHost, Port, sslEnable, smtpAuth);
             }
         });
+
         Button printInfo = findViewById(R.id.printFormButton);
         printInfo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                printPOS();
+                printPOS_CS50();
             }
         });
 
 
-        //POS Version out
+//        PosApiHelper posApiHelper = PosApiHelper.getInstance(); //THIS IS FOR PRINTER-POS CS50
+
+        //POS CS50 Version out
 //        byte version[] = new byte[4];
 //        PosApiHelper posApiHelper = PosApiHelper.getInstance();
 //        posApiHelper.SysGetVersion(version);
 //        Log.w("HERE IS VERSION POS", version.toString());
-//        testApiSimple();
     }
 
-    public void printPOS(){
+
+    //find model of sunmi POS
+    private void initPrinter() {
+        try {
+            PrinterSdk.getInstance().getPrinter(this, new PrinterSdk.PrinterListen() {
+                @Override
+                public void onDefPrinter(PrinterSdk.Printer printer) {
+                    sunmiv2sPrinter = printer;
+                }
+
+                @Override
+                public void onPrinters(List<PrinterSdk.Printer> printers) {
+
+                }
+            });
+        } catch (SdkException e) {
+            e.printStackTrace();
+        }
+    }
+
+    //print info for sunmi POS
+    private void printLabel1ForSunmi(int count) {
+        try {
+            CanvasApi api = sunmiv2sPrinter.canvasApi();
+            api.initCanvas(BaseStyle.getStyle().setWidth(240).setHeight(160));
+            api.renderArea(AreaStyle.getStyle().setStyle(Shape.BOX).setPosX(0).setPosY(0).setWidth(240).setHeight(159));
+            api.renderText("品牌：SUNMI", TextStyle.getStyle().setTextSize(32).enableBold(true).setPosX(10).setPosY(10));
+            api.renderText("商米是一家以“利他心”为核心价值观的物联网科技公司", TextStyle.getStyle().setTextSize(20).setPosX(60)
+                    .setPosY(50).setWidth(160).setHeight(100));
+            api.printCanvas(count, new PrintResult() {
+                @Override
+                public void onResult(int resultCode, String message) throws RemoteException {
+                    if(resultCode == 0) {
+                        //打印完成 wtf hahaha
+                    } else {
+                        //打印失败
+                    }
+                }
+            });
+        } catch (SdkException e) {
+            e.printStackTrace();
+        }
+    }
+
+    //print on cs50 POS
+    public void printPOS_CS50(){
         PosApiHelper posApiHelper = PosApiHelper.getInstance();
         int ret = posApiHelper.PrintInit(3, 16, 16, 0x33);
         if(ret!=0){

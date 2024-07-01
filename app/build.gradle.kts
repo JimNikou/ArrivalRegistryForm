@@ -64,6 +64,7 @@ dependencies {
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
     implementation("com.sun.mail:android-mail:1.6.6")
     implementation("com.sun.mail:android-activation:1.6.7")
+    implementation("com.sunmi:printerx:1.0.15")
 
     // Include any additional dependencies required by the SDK here
     // For example, if the SDK comes with any jar or aar files, include them
