@@ -1,45 +1,52 @@
 package ict.ihu.gr.arf;
-import android.content.Intent;
-import android.os.Message;
-import android.util.Log;
+
 import android.os.Bundle;
-import android.widget.Button;
+import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
-import javax.mail.MessagingException;
-import javax.mail.Transport;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
+import android.widget.RadioButton;
+
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
+import com.ctk.sdk.PosApiHelper;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Properties;
 
 import javax.mail.Authenticator;
 import javax.mail.MessagingException;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
-import javax.mail.Transport;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+
 import ict.ihu.gr.arf.databinding.ActivityMainBinding;
+import ict.ihu.gr.arf.ui.SharedViewModel;
 
 public class MainActivity extends AppCompatActivity {
 
+    // shared view model for more info function, used to get the SharedViewModel
+    private SharedViewModel sharedViewModel;
     private static final String TAG = "MainActivity";
     public String emailSubject;
+    public String infoToPrint;
     public String emailBody;
     private ActivityMainBinding binding;
 
+    String stringHost = "mail.dalamaras.gr";
+    String Port = "465";
+    String sslEnable = "true";
+    String smtpAuth = "true";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,43 +64,87 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-        Button buttonClickMe = findViewById(R.id.CompleteButton);
+        // setting the call of the function on change
+        sharedViewModel = new ViewModelProvider(this).get(SharedViewModel.class);
 
-        buttonClickMe.setOnClickListener(new View.OnClickListener() {
+        // observes changes in the fillSettingsEvent
+        sharedViewModel.getFillSettingsEvent().observe(this, new Observer<Boolean>() {
             @Override
-            public void onClick(View v) {
-                getData();
+            public void onChanged(Boolean aBoolean) {
+                if (aBoolean) {
+                    fillSettingsTextEdit();
+                }
             }
         });
 
 
+        Button buttonClickMe = findViewById(R.id.CompleteButton);
+        buttonClickMe.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getData(stringHost, Port, sslEnable, smtpAuth);
+            }
+        });
+        Button printInfo = findViewById(R.id.printFormButton);
+        printInfo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                printPOS();
+            }
+        });
 
 
-
+        //POS Version out
+//        byte version[] = new byte[4];
+//        PosApiHelper posApiHelper = PosApiHelper.getInstance();
+//        posApiHelper.SysGetVersion(version);
+//        Log.w("HERE IS VERSION POS", version.toString());
+//        testApiSimple();
     }
 
-    public void getData() {
+    public void printPOS(){
+        PosApiHelper posApiHelper = PosApiHelper.getInstance();
+        int ret = posApiHelper.PrintInit(3, 16, 16, 0x33);
+        if(ret!=0){
+            return;
+        }
+        posApiHelper.PrintStr("------Registration Form------\n");
+        if(ret!=0){
+            return;
+        }
+        posApiHelper.PrintStr("INNOVATION Tests\n");
+        posApiHelper.PrintStr(infoToPrint);
+        posApiHelper.PrintStr(" \n");
+        posApiHelper.PrintStr("Signature: \n");
+        posApiHelper.PrintStr(" \n");
+        posApiHelper.PrintStr(" \n");
+        posApiHelper.PrintStr(" \n");
+        posApiHelper.PrintStr(" \n");
+        posApiHelper.PrintStr(" \n");
+        posApiHelper.PrintStart();
+    }
+    public void getData(String stringHost, String Port, String sslEnable, String smtpAuth) {
         try {
             String stringSenderEmail = "support@dalamaras.gr";
             String stringReceiverEmail = "innovation@dalamaras.gr";
             String stringPasswordSenderEmail = "innsup!13";
 
-        String stringHost = "mail.dalamaras.gr";
-
-        Properties properties = System.getProperties();
-
-        properties.put("mail.smtp.host", stringHost);
-        properties.put("mail.smtp.port", "465");
-        properties.put("mail.smtp.ssl.enable", "true");
-        properties.put("mail.smtp.auth", "true");
 
 
-        javax.mail.Session session = Session.getDefaultInstance(properties, new Authenticator() {
-            @Override
-            protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(stringSenderEmail, stringPasswordSenderEmail);
-            }
-        });
+            Properties properties = System.getProperties();
+
+            properties.put("mail.smtp.host", stringHost);
+            properties.put("mail.smtp.port", Port);
+            properties.put("mail.smtp.ssl.enable", sslEnable);
+            properties.put("mail.smtp.auth", smtpAuth);
+
+
+            javax.mail.Session session = Session.getDefaultInstance(properties, new Authenticator() {
+                @Override
+                protected PasswordAuthentication getPasswordAuthentication() {
+                    return new PasswordAuthentication(stringSenderEmail, stringPasswordSenderEmail);
+                }
+            });
 
             MimeMessage mimeMessage = new MimeMessage(session);
             mimeMessage.addRecipient(MimeMessage.RecipientType.TO, new InternetAddress(stringReceiverEmail));
@@ -131,6 +182,9 @@ public class MainActivity extends AppCompatActivity {
             String Nationality = teNationality.getText().toString();
             Log.d(TAG, "Nationality: " + Nationality);
 
+            RadioButton rbPaymentTypeCash = findViewById(R.id.CashRadioButton);
+            RadioButton rbPaymentTypeCard = findViewById(R.id.CardRadioButton);
+//            rbPaymentTypeCard.getFocused
 
             LocalDateTime currentDateTime = null;
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
@@ -153,22 +207,24 @@ public class MainActivity extends AppCompatActivity {
                     "Email: " + Email + "\n" +
                     "Phone Number: " + PhoneNumber + "\n" +
                     "ID Number: " + IdNo + "\n" +
-                    "Nationality: " + Nationality;
+                    "Nationality: " + Nationality + "\n";
+//                    "Payment Type: " + PaymentType;
 
+            infoToPrint = emailBody;
             mimeMessage.setSubject(emailSubject);
             mimeMessage.setText(emailBody);
 
-            Thread thread = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        Transport.send(mimeMessage);
-                    } catch (MessagingException e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-            thread.start();
+//            Thread thread = new Thread(new Runnable() {
+//                @Override
+//                public void run() {
+//                    try {
+//                        Transport.send(mimeMessage);
+//                    } catch (MessagingException e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+//            });
+//            thread.start();
 
         } catch (AddressException e) {
             e.printStackTrace();
@@ -178,4 +234,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    public void fillSettingsTextEdit(){
+        //tte = temporary text edit
+        EditText tte = findViewById(R.id.smtpHostTextEdit);
+        tte.setHint(stringHost);
+        tte = findViewById(R.id.portTextEdit);
+        tte.setHint(Port);
+        tte = findViewById(R.id.sslTextEdit);
+        tte.setHint(sslEnable);
+        tte = findViewById(R.id.authTextEdit);
+        tte.setHint(smtpAuth);
+    }
 }

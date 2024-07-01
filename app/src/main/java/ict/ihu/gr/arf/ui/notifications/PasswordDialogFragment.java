@@ -7,19 +7,20 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
-
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import ict.ihu.gr.arf.MainActivity;
 import ict.ihu.gr.arf.R;
 
 public class PasswordDialogFragment extends DialogFragment {
 
     private static final String CORRECT_PASSWORD = "52525";
     private static final String TAG = "PasswordDialogFragment";
+
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
@@ -30,6 +31,7 @@ public class PasswordDialogFragment extends DialogFragment {
 
         builder.setView(view)
                 .setTitle("Enter Password")
+                .setCancelable(false) // Makes the dialog non-cancelable
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
@@ -39,9 +41,7 @@ public class PasswordDialogFragment extends DialogFragment {
                         } else {
                             Log.w(TAG, "Incorrect password");
                             Toast.makeText(getActivity(), "Incorrect Password", Toast.LENGTH_SHORT).show();
-
                             navigateToHome();
-
                         }
                     }
                 })
@@ -51,7 +51,10 @@ public class PasswordDialogFragment extends DialogFragment {
                         navigateToHome();
                     }
                 });
-        return builder.create();
+
+        AlertDialog dialog = builder.create();
+        dialog.setCanceledOnTouchOutside(false); // Prevents touching outside to dismiss the dialog
+        return dialog;
     }
 
     private void navigateToHome() {
@@ -63,5 +66,4 @@ public class PasswordDialogFragment extends DialogFragment {
             Toast.makeText(getActivity(), "Error navigating to Home", Toast.LENGTH_SHORT).show();
         }
     }
-
 }

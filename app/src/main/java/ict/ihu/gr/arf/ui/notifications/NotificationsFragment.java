@@ -16,14 +16,18 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
+import ict.ihu.gr.arf.MainActivity;
 import ict.ihu.gr.arf.R;
+import ict.ihu.gr.arf.ui.SharedViewModel;
 
 public class NotificationsFragment extends Fragment {
 
     private static final String SHARED_PREFS_NAME = "AppPrefs";
+    private SharedViewModel sharedViewModel;
     private static final String PASSWORD_KEY = "notification_password";
     private static final String DEFAULT_PASSWORD = "52525";
 
@@ -43,8 +47,17 @@ public class NotificationsFragment extends Fragment {
             }
         });
 
-        promptForPassword();
+        sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
 
+        Button seeInfoButton = root.findViewById(R.id.seeInfoButton);
+        seeInfoButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sharedViewModel.triggerFillSettings();
+            }
+        });
+
+        promptForPassword();
         return root;
     }
 
@@ -62,7 +75,7 @@ public class NotificationsFragment extends Fragment {
     private void promptForPassword() {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle("Enter Password");
-
+        builder.setCancelable(false);
         final EditText input = new EditText(getActivity());
         input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
         builder.setView(input);

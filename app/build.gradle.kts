@@ -16,6 +16,16 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    sourceSets {
+        getByName("main") {
+            java.srcDirs("src/main/java", "src/main/aidl")
+            aidl.srcDirs("src/main/aidl")
+            aidl {
+                srcDirs("src/main/aidl")
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -25,21 +35,23 @@ android {
             )
         }
     }
+
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility(JavaVersion.VERSION_1_8)
+        targetCompatibility(JavaVersion.VERSION_1_8)
     }
+
     buildFeatures {
         viewBinding = true
     }
-    packagingOptions{
+
+    packagingOptions {
         exclude("META-INF/NOTICE.md")
-        exclude ("META-INF/LICENSE.md")
+        exclude("META-INF/LICENSE.md")
     }
 }
 
 dependencies {
-
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.11.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
@@ -53,5 +65,7 @@ dependencies {
     implementation("com.sun.mail:android-mail:1.6.6")
     implementation("com.sun.mail:android-activation:1.6.7")
 
-
+    // Include any additional dependencies required by the SDK here
+    // For example, if the SDK comes with any jar or aar files, include them
+    implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar", "*.aar", "*.aidl"))))
 }
