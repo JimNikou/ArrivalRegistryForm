@@ -8,6 +8,7 @@
     tools:context=".ui.notifications.NotificationsFragment">
 
     <ScrollView
+        android:id="@+id/ScrollView"
         android:layout_width="409dp"
         android:layout_height="729dp"
         android:layout_marginStart="1dp"
@@ -27,7 +28,7 @@
 
             <TableRow
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" >
+                android:layout_height="match_parent">
 
                 <TextView
                     android:id="@+id/textView16"
@@ -42,9 +43,12 @@
                     android:id="@+id/customPasswordTextEdit"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:backgroundTint="#E68369"
                     android:ems="10"
                     android:inputType="text"
-                    android:password="true" />
+                    android:password="true"
+                    android:textColorHint="#E68369"
+                    android:textCursorDrawable="@null" />
             </TableRow>
 
             <TableRow
@@ -64,8 +68,11 @@
                     android:id="@+id/smtpHostTextEdit"
                     android:layout_width="231dp"
                     android:layout_height="wrap_content"
+                    android:backgroundTint="#E68369"
                     android:ems="10"
-                    android:inputType="text" />
+                    android:inputType="text"
+                    android:textColorHint="#E68369"
+                    android:textCursorDrawable="@null" />
             </TableRow>
 
             <TableRow
@@ -85,8 +92,11 @@
                     android:id="@+id/portTextEdit"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:backgroundTint="#E68369"
                     android:ems="10"
-                    android:inputType="text" />
+                    android:inputType="text"
+                    android:textColorHint="#E68369"
+                    android:textCursorDrawable="@null" />
             </TableRow>
 
             <TableRow
@@ -106,8 +116,61 @@
                     android:id="@+id/sslTextEdit"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:backgroundTint="#E68369"
                     android:ems="10"
-                    android:inputType="text" />
+                    android:inputType="text"
+                    android:textColorHint="#E68369"
+                    android:textCursorDrawable="@null" />
+
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:id="@+id/textView18"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Auth Enable"
+                    android:textAlignment="center"
+                    android:textAllCaps="false"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <EditText
+                    android:id="@+id/authEnableTextEdit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="#E68369"
+                    android:ems="10"
+                    android:inputType="text"
+                    android:textColorHint="#E68369"
+                    android:textCursorDrawable="@null" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:id="@+id/textView13"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Sender Mail"
+                    android:textAlignment="center"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <EditText
+                    android:id="@+id/senderMailTextEdit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="#E68369"
+                    android:ems="10"
+                    android:inputType="text"
+                    android:textColorHint="#E68369"
+                    android:textCursorDrawable="@null" />
 
             </TableRow>
 
@@ -119,17 +182,47 @@
                     android:id="@+id/textView15"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Auth Enable"
+                    android:text="Sender Password"
                     android:textAlignment="center"
                     android:textSize="20sp"
-                    android:fontFamily="sans-serif-black" />
+                    android:textStyle="bold" />
 
                 <EditText
-                    android:id="@+id/authTextEdit"
+                    android:id="@+id/senderPasswordTextEdit"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:backgroundTint="#E68369"
                     android:ems="10"
-                    android:inputType="text" />
+                    android:inputType="text"
+                    android:textColorHint="#E68369"
+                    android:textCursorDrawable="@null" />
+
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:id="@+id/textView17"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Receiver Mail"
+                    android:textAlignment="center"
+                    android:textAllCaps="false"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <EditText
+                    android:id="@+id/receiverMailTextEdit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="#E68369"
+                    android:ems="10"
+                    android:inputType="text"
+                    android:textColorHint="#E68369"
+                    android:textCursorDrawable="@null" />
+
             </TableRow>
 
             <TableRow
@@ -148,14 +241,22 @@
                     android:id="@+id/seeInfoButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginLeft="25dp"
                     android:layout_marginTop="80dp"
+                    android:paddingTop="4dp"
                     android:text="See Info" />
+
+                <Switch
+                    android:id="@+id/switch1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Switch" />
 
             </TableRow>
 
             <TableRow
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" >
+                android:layout_height="match_parent">
 
                 <Button
                     android:id="@+id/saveChanges"
@@ -164,6 +265,33 @@
                     android:text="Save Changes" />
 
             </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <Switch
+                    android:id="@+id/enablePrinting"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="#E68369"
+                    android:buttonTint="#E68369"
+                    android:text="Enable Printing"
+                    android:textColorLink="#E68369"
+                    android:textCursorDrawable="@null" />
+
+                <Switch
+                    android:id="@+id/enableEmails"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="25dp"
+                    android:backgroundTint="#E68369"
+                    android:buttonTint="#E68369"
+                    android:text="Enable E-mailing"
+                    android:textColorLink="#E68369"
+                    android:textCursorDrawable="@null" />
+            </TableRow>
+
         </TableLayout>
     </ScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>

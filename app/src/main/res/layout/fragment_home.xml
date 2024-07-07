@@ -7,6 +7,7 @@
     tools:context=".ui.home.HomeFragment">
 
     <ScrollView
+        android:id="@+id/scrollViewMain"
         android:layout_width="400dp"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -16,6 +17,7 @@
         app:layout_constraintVertical_bias="0.0">
 
         <LinearLayout
+            android:id="@+id/linearViewMain"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
@@ -35,8 +37,13 @@
                 android:id="@+id/FullNameTextEdit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:backgroundTint="#E68369"
                 android:ems="10"
-                android:inputType="text" />
+                android:inputType="text"
+                android:paddingLeft="20dp"
+                android:textColorHint="#E68369"
+                android:textColorLink="#E68369"
+                android:textCursorDrawable="@null" />
 
             <TextView
                 android:id="@+id/textView4"
@@ -53,8 +60,12 @@
                 android:id="@+id/EmailTextEdit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:backgroundTint="#E68369"
                 android:ems="10"
-                android:inputType="text" />
+                android:inputType="text"
+                android:paddingLeft="20dp"
+                android:textColorHint="#E68369"
+                android:textCursorDrawable="@null" />
 
             <TextView
                 android:id="@+id/textView2"
@@ -71,8 +82,12 @@
                 android:id="@+id/StreetNameTextEdit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:backgroundTint="#E68369"
                 android:ems="10"
-                android:inputType="text" />
+                android:inputType="text"
+                android:paddingLeft="20dp"
+                android:textColorHint="#E68369"
+                android:textCursorDrawable="@null" />
 
             <TextView
                 android:id="@+id/textView3"
@@ -89,8 +104,12 @@
                 android:id="@+id/ZipCodeTextEdit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:backgroundTint="#E68369"
                 android:ems="10"
-                android:inputType="text" />
+                android:inputType="text"
+                android:paddingLeft="20dp"
+                android:textColorHint="#E68369"
+                android:textCursorDrawable="@null" />
 
             <TextView
                 android:id="@+id/textView6"
@@ -107,8 +126,12 @@
                 android:id="@+id/IDNumberTextEdit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:backgroundTint="#E68369"
                 android:ems="10"
-                android:inputType="text" />
+                android:inputType="text"
+                android:paddingLeft="20dp"
+                android:textColorHint="#E68369"
+                android:textCursorDrawable="@null" />
 
             <TextView
                 android:id="@+id/textView5"
@@ -125,8 +148,12 @@
                 android:id="@+id/PhoneNumberTextEdit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:backgroundTint="#E68369"
                 android:ems="10"
-                android:inputType="text" />
+                android:inputType="text"
+                android:paddingLeft="20dp"
+                android:textColorHint="#E68369"
+                android:textCursorDrawable="@null" />
 
             <TextView
                 android:id="@+id/textView7"
@@ -143,8 +170,12 @@
                 android:id="@+id/NationalityTextEdit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:backgroundTint="#E68369"
                 android:ems="10"
-                android:inputType="text" />
+                android:inputType="text"
+                android:paddingLeft="20dp"
+                android:textColorHint="#E68369"
+                android:textCursorDrawable="@null" />
 
             <TextView
                 android:id="@+id/textView8"
@@ -161,8 +192,12 @@
                 android:id="@+id/TownTextEdit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:backgroundTint="#E68369"
                 android:ems="10"
-                android:inputType="text" />
+                android:inputType="text"
+                android:paddingLeft="20dp"
+                android:textColorHint="#E68369"
+                android:textCursorDrawable="@null" />
 
             <TableLayout
                 android:layout_width="match_parent"
@@ -176,13 +211,27 @@
                         android:id="@+id/CashRadioButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Cash / Μετρητά" />
+                        android:layout_marginLeft="20dp"
+                        android:allowUndo="true"
+                        android:backgroundTint="#E68369"
+                        android:buttonTint="#E68369"
+                        android:duplicateParentState="false"
+                        android:paddingTop="5dp"
+                        android:text="Cash / Μετρητά"
+                        android:textColorLink="#E68369"
+                        android:textCursorDrawable="@null" />
 
                     <RadioButton
                         android:id="@+id/CardRadioButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Card / Κάρτα" />
+                        android:layout_marginLeft="70dp"
+                        android:allowUndo="true"
+                        android:backgroundTint="#E68369"
+                        android:buttonTint="#E68369"
+                        android:text="Card / Κάρτα"
+                        android:textColorLink="#E68369"
+                        android:textCursorDrawable="@null" />
                 </TableRow>
 
                 <TableRow
@@ -193,6 +242,7 @@
                         android:id="@+id/CompleteButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginLeft="25dp"
                         android:layout_marginTop="8dp"
                         android:text="COMPLETE" />
 
@@ -200,19 +250,24 @@
                         android:id="@+id/printFormButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="Print Form" />
+                        android:layout_marginLeft="50dp"
+                        android:layout_marginTop="8dp"
+                        android:text="Print Form"
+                        android:visibility="invisible" />
                 </TableRow>
 
                 <TableRow
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent" >
+                    android:layout_height="match_parent">
 
                     <Button
                         android:id="@+id/button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Button" />
+                        android:layout_marginTop="15dp"
+                        android:paddingTop="10dp"
+                        android:text="Button"
+                        android:visibility="invisible" />
                 </TableRow>
 
                 <TableRow
