@@ -1,19 +1,28 @@
 package ict.ihu.gr.arf;
 
+import static android.graphics.Color.GRAY;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.RemoteException;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.RadioButton;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -56,13 +65,22 @@ public class MainActivity extends AppCompatActivity {
 
     // shared view model for more info function, used to get the SharedViewModel
     private SharedViewModel sharedViewModel;
+    private static final String PREFS_NAME = "LicenseCheck";
+    private static final String FIRST_TIME_KEY = "firstTime";
     private static final String TAG = "MainActivity";
-    private String PaymentType = "No Payment Time Selected";
+    private String PaymentType = "No Payment Type Selected";
     private String emailSubject;
+    private String vatNumber = "None";
+    private boolean invoice = false;
+    private boolean receipt = true;
+    private Button invoiceButton;
+    private Button receiptButton;
     public String infoToPrint;
     private String emailBody;
+    private boolean print = false;
     private ActivityMainBinding binding;
     private NavController navController;
+    private String acceptedGDPR = "Yes";
     private RadioButton lastCheckedRadioButton = null;
     public String[] lines;
     private boolean letPrint = false;
@@ -90,7 +108,38 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(binding.navView, navController);
 
+        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+        boolean firstTime = settings.getBoolean(FIRST_TIME_KEY, true);
+//        Database db = new Database(MainActivity.this);
+//        boolean licenseExpired = db.licenseExpiry(db.licenseExpiryDate);
+        if (firstTime) {
+            showFirstTimeDialog(settings);
+        }
 
+
+        invoiceButton = findViewById(R.id.invoiceButton);
+        receiptButton = findViewById(R.id.receiptButton);
+        invoiceButton.setBackgroundColor(GRAY);
+        invoiceButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                receipt = false;
+                invoice = true;
+                invoiceButton.setBackgroundColor(Color.parseColor("#131842"));
+                showVATDialog();
+                receiptButton.setBackgroundColor(GRAY);
+            }
+        });
+
+        receiptButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                receiptButton.setBackgroundColor(Color.parseColor("#131842"));
+                invoiceButton.setBackgroundColor(GRAY);
+                receipt=true;
+                invoice = false;
+            }
+        });
         navController.addOnDestinationChangedListener(new NavController.OnDestinationChangedListener() {
             @Override
             public void onDestinationChanged(@NonNull NavController controller, @NonNull NavDestination destination, Bundle arguments) {
@@ -126,6 +175,19 @@ public class MainActivity extends AppCompatActivity {
         RadioButton rbPaymentTypeCash = findViewById(R.id.CashRadioButton);
         RadioButton rbPaymentTypeCard = findViewById(R.id.CardRadioButton);
 
+        Button buttonComplete = findViewById(R.id.CompleteButton);
+        CheckBox checkButton = findViewById(R.id.checkBox);
+        checkButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (checkButton.isChecked()) {
+                    buttonComplete.setEnabled(true);
+                    acceptedGDPR = "Yes";
+                } else {
+                    buttonComplete.setEnabled(false);
+                }
+            }
+        });
         RadioButton.OnClickListener radioButtonClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -144,11 +206,13 @@ public class MainActivity extends AppCompatActivity {
                     clickedRadioButton.setChecked(true);
                     lastCheckedRadioButton = clickedRadioButton;
 
-                    // Update the PaymentType variable based on the selected radio button
-                    if (clickedRadioButton == rbPaymentTypeCash) {
+                    // Update the PaymentType variable based on the selected radio button and the agreement
+                    if (clickedRadioButton == rbPaymentTypeCash && checkButton.isChecked()) {
                         PaymentType = "Cash";
-                    } else if (clickedRadioButton == rbPaymentTypeCard) {
+                        buttonComplete.setEnabled(true);
+                    } else if (clickedRadioButton == rbPaymentTypeCard && checkButton.isChecked()) {
                         PaymentType = "Card";
+                        buttonComplete.setEnabled(true);
                     } else{
                         PaymentType = "No Payment Time Selected";
                     }
@@ -172,7 +236,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        Button buttonComplete = findViewById(R.id.CompleteButton);
         buttonComplete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -180,17 +243,22 @@ public class MainActivity extends AppCompatActivity {
                 printData();
 
                 if(sharedPreferences.getBoolean(notificationsFragment.KEY_ENABLE_PRINTING, false)){
-                    if(sunmiv2sPrinter == null){
-                        printPOS_CS50();
-                    } else {
+                    print = false;
+                    getDataSendData();
+                    if(sunmiv2sPrinter != null){
                         printLabel1ForSunmi(1);
+                    } else {
+                        printPOS_CS50();
                     }
                     Log.d("DATA", "enabled printing");
                 }
                 if(sharedPreferences.getBoolean(notificationsFragment.KEY_ENABLE_EMAILS, false)){
-                    getData();
+                    print = true;
+                    getDataSendData();
                     Log.d("DATA", "enabled emailing");
                 }
+                receipt = true;
+                clearSelections();
             }
         });
 
@@ -206,22 +274,127 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-//        Button printInfo = findViewById(R.id.printFormButton);
-//        printInfo.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                if(sunmiv2sPrinter == null){
-//                        printPOS_CS50();
-//                    } else {
-//                        printLabel1ForSunmi(1);
-//                    }
-//            }
-//        });
+        Button clearInfo = findViewById(R.id.clearFormButton);
+        clearInfo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                clearSelections();
+            }
+        });
 
         initPrinter(); //initializing SUNMI V2S or any SUNMI printer.
 //        PosApiHelper posApiHelper = PosApiHelper.getInstance(); //THIS IS FOR PRINTER-POS CS50
 //        Log.d("STATUS SUNMI", sunmiv2sPrinter.toString());
     }
+
+    private void showVATDialog() {
+        // Inflate the dialog layout
+        LayoutInflater inflater = LayoutInflater.from(this);
+        View dialogView = inflater.inflate(R.layout.dialog_enter_vat, null);
+
+        // Create the AlertDialog
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+        dialogBuilder.setView(dialogView);
+        dialogBuilder.setTitle("Enter VAT/ΑΦΜ Number");
+
+        final EditText editTextVAT = dialogView.findViewById(R.id.edittext_vat);
+
+        dialogBuilder.setPositiveButton("OK", null);
+        dialogBuilder.setNegativeButton("Cancel", (dialog, which) -> {
+            dialog.dismiss();
+            receipt = true;
+            invoice = false;
+            invoiceButton.setBackgroundColor(Color.GRAY);
+            receiptButton.setBackgroundColor(Color.parseColor("#131842"));
+        });
+
+        final AlertDialog vatDialog = dialogBuilder.create();
+        vatDialog.show();
+
+        // Initially disable the OK button
+        vatDialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
+
+        // Add TextWatcher to EditText
+        editTextVAT.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                // No action needed
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                // Enable or disable the OK button based on whether EditText is empty or not
+                vatDialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(s.toString().trim().length() > 0);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                // No action needed
+            }
+        });
+
+        vatDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                vatNumber = editTextVAT.getText().toString();
+                // Perform any action with the entered VAT number
+                Toast.makeText(MainActivity.this, "VAT/ΑΦΜ Number: " + vatNumber, Toast.LENGTH_SHORT).show();
+                vatDialog.dismiss();
+            }
+        });
+    }
+
+    private void showFirstTimeDialog(SharedPreferences settings) {
+        // Inflate the dialog layout
+        LayoutInflater inflater = this.getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.dialog_license_key, null);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setView(dialogView);
+
+        final EditText editTextFullName = dialogView.findViewById(R.id.editTextFullName);
+        final EditText editTextLicenseKey = dialogView.findViewById(R.id.editTextLicenseKey);
+        Button buttonSubmit = dialogView.findViewById(R.id.buttonSubmit);
+
+        final AlertDialog dialog = builder.create();
+        dialog.setCancelable(false);
+        dialog.show();
+
+        buttonSubmit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String fullName = editTextFullName.getText().toString().trim();
+                String licenseKey = editTextLicenseKey.getText().toString().trim();
+
+                Database db = new Database(MainActivity.this);
+                Log.d("TAG", "1");
+
+                db.getData(fullName, licenseKey, new Database.DataCallback() {
+                    @Override
+                    public void onDataChecked(boolean isValid) {
+                        if (isValid) {
+                            dialog.dismiss();
+                            // Record that the app has been started at least once
+                            SharedPreferences.Editor editor = settings.edit();
+                            editor.putBoolean(FIRST_TIME_KEY, false);
+                            editor.apply();
+                            db.updateUsedStatus(fullName);
+                        } else {
+                            Toast.makeText(MainActivity.this, "Invalid Full Name or License Key", Toast.LENGTH_SHORT).show();
+                            if (fullName.isEmpty()) {
+                                editTextFullName.setError("Full Name is required");
+                            }
+                            if (licenseKey.isEmpty()) {
+                                editTextLicenseKey.setError("License Key is required");
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+
 
 
     void printData(){
@@ -317,14 +490,16 @@ public class MainActivity extends AppCompatActivity {
         if(ret!=0){
             return;
         }
-        posApiHelper.PrintStr("INNOVATION Tests\n");
+        posApiHelper.PrintStr("Register Receipt\n");
         posApiHelper.PrintStr(infoToPrint);
-        posApiHelper.PrintStr(" \n");
+//        posApiHelper.PrintStr(" \n");
         posApiHelper.PrintStr("Signature: \n");
         posApiHelper.PrintStr(" \n");
         posApiHelper.PrintStr(" \n");
         posApiHelper.PrintStr(" \n");
         posApiHelper.PrintStr(" \n");
+        posApiHelper.PrintStr(" \n");
+        posApiHelper.PrintStr("-------------------------------------\n");
         posApiHelper.PrintStr(" \n");
         posApiHelper.PrintStart();
 
@@ -334,7 +509,7 @@ public class MainActivity extends AppCompatActivity {
 //        posApiHelper.SysGetVersion(version);
 //        Log.w("HERE IS VERSION POS", version.toString());
     }
-    public void getData() {
+    public void getDataSendData() {
         try {
 //            String stringSenderEmail = "support@dalamaras.gr";
 //            String stringReceiverEmail = "innovation@dalamaras.gr";
@@ -421,12 +596,21 @@ public class MainActivity extends AppCompatActivity {
                     "Phone Number: " + PhoneNumber + "\n" +
                     "ID Number: " + IdNo + "\n" +
                     "Nationality: " + Nationality + "\n" +
-                    "Payment Type: " + PaymentType;
+                    "Payment Type: " + PaymentType + "\n" +
+                    "Accepted GDPR: " + acceptedGDPR + "\n";
+
+            Button receiptRB = findViewById(R.id.receiptButton);
+            if(invoice){
+                emailBody = emailBody + "Invoice VAT: " + vatNumber +"\n";
+            } else if (receipt) {
+                emailBody = emailBody + "Document: Receipt" + "\n";
+            }
 
             infoToPrint = emailBody;
             mimeMessage.setSubject(emailSubject);
             mimeMessage.setText(emailBody);
 
+            if (print) {
                 Thread thread = new Thread(new Runnable() {
                     @Override
                     public void run() {
@@ -438,6 +622,8 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
                 thread.start();
+                print = false;
+            }
 
 
         } catch (AddressException e) {
@@ -447,6 +633,40 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
+    void clearSelections(){
+        receipt = true;
+        invoice = false;
+        CheckBox checkBox = findViewById(R.id.checkBox);
+        checkBox.setChecked(false);
+        RadioButton rbPaymentTypeCash = findViewById(R.id.CashRadioButton);
+        RadioButton rbPaymentTypeCard = findViewById(R.id.CardRadioButton);
+        Button complete = findViewById(R.id.CompleteButton);
+        complete.setEnabled(false);
+        rbPaymentTypeCard.setChecked(false);
+        rbPaymentTypeCash.setChecked(false);
+        EditText clear = findViewById(R.id.FullNameTextEdit);
+        clear.setText("");
+        clear = findViewById(R.id.EmailTextEdit);
+        clear.setText("");
+        clear = findViewById(R.id.StreetNameTextEdit);
+        clear.setText("");
+        clear = findViewById(R.id.ZipCodeTextEdit);
+        clear.setText("");
+        clear = findViewById(R.id.IDNumberTextEdit);
+        clear.setText("");
+        clear = findViewById(R.id.PhoneNumberTextEdit);
+        clear.setText("");
+        clear = findViewById(R.id.NationalityTextEdit);
+        clear.setText("");
+        clear = findViewById(R.id.TownTextEdit);
+        clear.setText("");
+        Button btemp = findViewById(R.id.receiptButton);
+        btemp.setBackgroundColor(Color.parseColor("#131842"));
+        btemp = findViewById(R.id.invoiceButton);
+        btemp.setBackgroundColor(GRAY);
+        acceptedGDPR = "No";
+    }
 
     public void fillSettingsTextEdit(){
         //tte = temporary text edit

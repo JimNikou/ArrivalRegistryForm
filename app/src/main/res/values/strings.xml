@@ -3,4 +3,5 @@
     <string name="title_home">Check-In Form</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Settings</string>
+    <string name="agreement">I agree and I understand the Terms &amp; Conditions mentioned on the hotel site here.</string>
 </resources>

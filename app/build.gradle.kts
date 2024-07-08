@@ -1,5 +1,6 @@
 plugins {
     id("com.android.application")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -65,6 +66,11 @@ dependencies {
     implementation("com.sun.mail:android-mail:1.6.6")
     implementation("com.sun.mail:android-activation:1.6.7")
     implementation("com.sunmi:printerx:1.0.15")
+
+    //firebase
+    implementation(platform("com.google.firebase:firebase-bom:33.1.1"))
+    implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-firestore")
 
     // Include any additional dependencies required by the SDK here
     // For example, if the SDK comes with any jar or aar files, include them
