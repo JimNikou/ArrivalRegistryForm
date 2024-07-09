@@ -50,7 +50,7 @@
                 android:id="@+id/textView4"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
+                android:layout_marginTop="14dp"
                 android:fontFamily="sans-serif-black"
                 android:text="E-mail"
                 android:textAlignment="center"
@@ -96,7 +96,7 @@
                 android:id="@+id/textView3"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="28dp"
+                android:layout_marginTop="18dp"
                 android:fontFamily="sans-serif-black"
                 android:text="Zip Code / Tαχ. Κωδ."
                 android:textAlignment="center"
@@ -281,6 +281,9 @@
                         android:id="@+id/receiptButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginLeft="25dp"
+                        android:paddingLeft="5dp"
+                        android:paddingRight="5dp"
                         android:text="Απόδειξη/Receipt" />
 
                     <Button
@@ -288,9 +291,9 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_centerInParent="true"
-                        android:layout_marginLeft="35dp"
-                        android:paddingLeft="10dp"
-                        android:paddingRight="10dp"
+                        android:layout_marginLeft="10dp"
+                        android:paddingLeft="5dp"
+                        android:paddingRight="5dp"
                         android:text="Τιμολόγιο/Invoice" />
 
                 </TableRow>
@@ -308,6 +311,8 @@
                         android:id="@+id/checkBox"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginLeft="20dp"
+                        android:layout_marginRight="20dp"
                         android:layout_span="2"
                         android:backgroundTint="#E68369"
                         android:buttonTint="#E68369"
@@ -338,7 +343,7 @@
                         android:layout_marginTop="8dp"
                         android:paddingLeft="20dp"
                         android:paddingRight="20dp"
-                        android:text="Clear"
+                        android:text="Clear Form"
                         android:visibility="visible" />
                 </TableRow>
 

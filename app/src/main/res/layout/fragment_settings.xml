@@ -245,8 +245,19 @@
                     android:backgroundTint="#E68369"
                     android:ems="10"
                     android:inputType="text" />
+
+
             </TableRow>
 
+            <TextView
+                android:id="@+id/textView20"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:backgroundTint="#E68369"
+                android:paddingLeft="20dp"
+                android:paddingRight="65dp"
+                android:text="@string/make_sure_settings"
+                android:textColorLink="#F31500" />
             <TableRow
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
@@ -255,7 +266,8 @@
                     android:id="@+id/save_changes_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="80dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginTop="10dp"
                     android:paddingTop="4dp"
                     android:text="Save Password" />
 
@@ -264,7 +276,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="10dp"
-                    android:layout_marginTop="80dp"
+                    android:layout_marginTop="10dp"
                     android:layout_marginRight="80dp"
                     android:paddingTop="4dp"
                     android:text="See Info" />
@@ -285,7 +297,16 @@
                     android:id="@+id/saveChanges"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
                     android:text="Save Changes" />
+
+                <Button
+                    android:id="@+id/howToUseButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="80dp"
+                    android:text="How to use" />
 
             </TableRow>
 
@@ -297,6 +318,7 @@
                     android:id="@+id/enablePrinting"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
                     android:layout_marginRight="35dp"
                     android:backgroundTint="#E68369"
                     android:buttonTint="#E68369"

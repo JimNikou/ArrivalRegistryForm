@@ -3,6 +3,9 @@
     <string name="title_home">Check-In Form</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Settings</string>
+    <string name="make_sure_settings"><a href="none">WARNING!</a> Make sure your application has all settings fields filled with the correct data to avoid
+    unnecessary complications when trying to Complete a form. <a href="">ΠΡΟΣΟΧΗ!</a> Βεβαιωθειτε οτι η εφαρμογή σας έχει συμπληρωμένα όλα τα πεδια
+    με τα σωστά δεδομένα για να αποφευχθούν περιττές περιπλοκές κατά την διάρκεια Αποστολής/Εκτύπωσης της φόρμας.</string>
     <string name="agreement">I agree and I understand the Terms &amp; Conditions mentioned on the hotel site under <a href="your_link_here">here</a>. You can scan the QR Code under the complete button to be re-directed there.</string>
     <string name="link"><a href="https://esperideshotel.gr/en/legal/terms-of-use">GDPR Terms and Conditions</a></string>
 </resources>

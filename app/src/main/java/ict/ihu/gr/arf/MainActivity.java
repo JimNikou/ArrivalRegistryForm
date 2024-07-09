@@ -81,16 +81,22 @@ public class MainActivity extends AppCompatActivity {
     private String PaymentType = "No Payment Type Selected";
     private String emailSubject;
     private String vatNumber = "None";
+    private Button buttonComplete;
     private boolean invoice = false;
     private boolean receipt = true;
     private Button invoiceButton;
     private Button receiptButton;
+    private CheckBox checkButton;
     public String infoToPrint;
     private String emailBody;
     private boolean print = false;
+    private boolean checkBoxChecked = false;
+    private boolean paymentMethodChecked = false;
     private ActivityMainBinding binding;
     private NavController navController;
     private String acceptedGDPR = "Yes";
+    private RadioButton rbPaymentTypeCard;
+    private RadioButton rbPaymentTypeCash;
     private RadioButton lastCheckedRadioButton = null;
     public String[] lines;
     private boolean letPrint = false;
@@ -118,7 +124,7 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(binding.navView, navController);
 
-        //link for the GPDR in the checkbox text
+        //link for the GDPR in the checkbox text
         SharedPreferences sharedPreferences = getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE);
         String inputLink = sharedPreferences.getString(notificationsFragment.KEY_GPDR, "");
 //        Log.d("url", inputLink);
@@ -242,20 +248,27 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-        RadioButton rbPaymentTypeCash = findViewById(R.id.CashRadioButton);
-        RadioButton rbPaymentTypeCard = findViewById(R.id.CardRadioButton);
+        rbPaymentTypeCash = findViewById(R.id.CashRadioButton);
+        rbPaymentTypeCard = findViewById(R.id.CardRadioButton);
 
-        Button buttonComplete = findViewById(R.id.CompleteButton);
-        CheckBox checkButton = findViewById(R.id.checkBox);
+        buttonComplete = findViewById(R.id.CompleteButton);
+        checkButton = findViewById(R.id.checkBox);
+
+
+//        final RadioButton[] clickedRadioButton = {dummyRadioButton};
+//        RadioButton dummyRadioButton = new RadioButton(this);
+//        clickedRadioButton = dummyRadioButton;
         checkButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (checkButton.isChecked()) {
-                    buttonComplete.setEnabled(true);
+//                    buttonComplete.setEnabled(true);
                     acceptedGDPR = "Yes";
+                    Log.d("type", "Accepted GDPR");
                 } else {
-                    buttonComplete.setEnabled(false);
+//                    buttonComplete.setEnabled(false);
                 }
+                updateButtonCompleteState();
             }
         });
         RadioButton.OnClickListener radioButtonClickListener = new View.OnClickListener() {
@@ -263,12 +276,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 RadioButton clickedRadioButton = (RadioButton) v;
 
-                if (clickedRadioButton == lastCheckedRadioButton) {
-                    // Uncheck the radio button and set lastCheckedRadioButton to null
-                    clickedRadioButton.setChecked(false);
-                    lastCheckedRadioButton = null;
-                    PaymentType = ""; // Reset the payment type when unselected
-                } else {
+                if (clickedRadioButton != lastCheckedRadioButton) {
                     // Check the clicked radio button and update lastCheckedRadioButton
                     if (lastCheckedRadioButton != null) {
                         lastCheckedRadioButton.setChecked(false);
@@ -276,19 +284,25 @@ public class MainActivity extends AppCompatActivity {
                     clickedRadioButton.setChecked(true);
                     lastCheckedRadioButton = clickedRadioButton;
 
+
                     // Update the PaymentType variable based on the selected radio button and the agreement
-                    if (clickedRadioButton == rbPaymentTypeCash && checkButton.isChecked()) {
+                    if (clickedRadioButton == rbPaymentTypeCash) {
                         PaymentType = "Cash";
-                        buttonComplete.setEnabled(true);
-                    } else if (clickedRadioButton == rbPaymentTypeCard && checkButton.isChecked()) {
+                        Log.d("type", clickedRadioButton.toString());
+//                        buttonComplete.setEnabled(true);
+                    } else if (clickedRadioButton == rbPaymentTypeCard) {
                         PaymentType = "Card";
-                        buttonComplete.setEnabled(true);
-                    } else{
-                        PaymentType = "No Payment Time Selected";
+                        Log.d("type", clickedRadioButton.toString());
+//                        buttonComplete.setEnabled(true);
+                    } else {
+                        PaymentType = "No Payment Type Selected";
                     }
                 }
+                updateButtonCompleteState();
             }
         };
+
+        buttonComplete.setEnabled(false);
 
         rbPaymentTypeCash.setOnClickListener(radioButtonClickListener);
         rbPaymentTypeCard.setOnClickListener(radioButtonClickListener);
@@ -312,15 +326,21 @@ public class MainActivity extends AppCompatActivity {
                 SharedPreferences sharedPreferences = getSharedPreferences(notificationsFragment.PREFS_NAME, Context.MODE_PRIVATE);
                 printData();
 
+                String now = String.valueOf(getDataSendData());
+                Log.d("now", now);
                 if(sharedPreferences.getBoolean(notificationsFragment.KEY_ENABLE_PRINTING, false)){
                     print = false;
-                    getDataSendData();
-                    if(sunmiv2sPrinter != null){
-                        printLabel1ForSunmi(1);
+                    if (getDataSendData()) {
+                        if (sunmiv2sPrinter != null) {
+                            printLabel1ForSunmi(1);
+                        } else {
+                            printPOS_CS50();
+                        }
+                        Log.d("DATA", "enabled printing");
                     } else {
-                        printPOS_CS50();
+                        Toast.makeText(MainActivity.this, "Settings Fields not filled or correct", Toast.LENGTH_SHORT).show();
+
                     }
-                    Log.d("DATA", "enabled printing");
                 }
                 if(sharedPreferences.getBoolean(notificationsFragment.KEY_ENABLE_EMAILS, false)){
                     print = true;
@@ -355,6 +375,14 @@ public class MainActivity extends AppCompatActivity {
         initPrinter(); //initializing SUNMI V2S or any SUNMI printer.
 //        PosApiHelper posApiHelper = PosApiHelper.getInstance(); //THIS IS FOR PRINTER-POS CS50
 //        Log.d("STATUS SUNMI", sunmiv2sPrinter.toString());
+    }
+
+    private void updateButtonCompleteState() {
+        if (checkButton.isChecked() && (rbPaymentTypeCash.isChecked() || rbPaymentTypeCard.isChecked())) {
+            buttonComplete.setEnabled(true);
+        } else {
+            buttonComplete.setEnabled(false);
+        }
     }
 
     private Bitmap generateQRCode(String url) throws WriterException {
@@ -517,8 +545,8 @@ public class MainActivity extends AppCompatActivity {
             int posY = 50;
             int lineHeight = 50;
 
-            api.initCanvas(BaseStyle.getStyle().setWidth(420).setHeight(1100));
-            api.renderArea(AreaStyle.getStyle().setStyle(Shape.BOX).setPosX(0).setPosY(0).setWidth(420).setHeight(1100));
+            api.initCanvas(BaseStyle.getStyle().setWidth(450).setHeight(2050));
+            api.renderArea(AreaStyle.getStyle().setStyle(Shape.BOX).setPosX(0).setPosY(0).setWidth(450).setHeight(2050));
             api.renderText("", TextStyle.getStyle().setTextSize(32).enableBold(true).setPosX(20).setPosY(70));
             api.renderText("---Registration Form---", TextStyle.getStyle().setTextSize(32).enableBold(true).setPosX(20).setPosY(5));
             for (String line : lines) {
@@ -536,7 +564,20 @@ public class MainActivity extends AppCompatActivity {
                     posY += lineHeight; // Move the Y position down for the next label
                 }
             }
+
             api.renderText("Signature:", TextStyle.getStyle().setTextSize(32).enableBold(true).setPosX(0).setPosY(posY));
+            api.renderText("Signing this document I", TextStyle.getStyle().setTextSize(32).enableBold(true).setPosX(0).setPosY(posY+250));
+            api.renderText("acknowledge the Terms &", TextStyle.getStyle().setTextSize(32).enableBold(true).setPosX(0).setPosY(posY+300));
+            api.renderText("Conditions listed in", TextStyle.getStyle().setTextSize(32).enableBold(true).setPosX(0).setPosY(posY+350));
+            api.renderText("the hotel site.", TextStyle.getStyle().setTextSize(32).enableBold(true).setPosX(0).setPosY(posY+400));
+            api.renderText("Υπογράφοντας την από-", TextStyle.getStyle().setTextSize(32).enableBold(true).setPosX(0).setPosY(posY+450));
+            api.renderText("δειξη αυτη συναινώ", TextStyle.getStyle().setTextSize(32).enableBold(true).setPosX(0).setPosY(posY+500));
+            api.renderText("στους Όρους και τις", TextStyle.getStyle().setTextSize(32).enableBold(true).setPosX(0).setPosY(posY+550));
+            api.renderText("Προϋποθέσεις όπου", TextStyle.getStyle().setTextSize(32).enableBold(true).setPosX(0).setPosY(posY+600));
+            api.renderText("αναγράφονται στην", TextStyle.getStyle().setTextSize(32).enableBold(true).setPosX(0).setPosY(posY+650));
+            api.renderText("ιστοσελίδα του ", TextStyle.getStyle().setTextSize(32).enableBold(true).setPosX(0).setPosY(posY+700));
+            api.renderText("ξενοδοχείου.", TextStyle.getStyle().setTextSize(32).enableBold(true).setPosX(0).setPosY(posY+750));
+
             api.printCanvas(count, new PrintResult() {
                 @Override
                 public void onResult(int resultCode, String message) throws RemoteException {
@@ -573,6 +614,9 @@ public class MainActivity extends AppCompatActivity {
         posApiHelper.PrintStr(" \n");
         posApiHelper.PrintStr(" \n");
         posApiHelper.PrintStr("-------------------------------------\n");
+        posApiHelper.PrintStr("Signing this document I acknowledge the Terms & Conditions listed in the hotel site." +
+                "Υπογράφοντας την απόδειξη αυτη συναινώ στους Όρους και τις Προϋποθέσεις οπου αναγράφονται στην ιστοσελίδα του" +
+                "ξενοδοχείου. \n");
         posApiHelper.PrintStr(" \n");
         posApiHelper.PrintStart();
 
@@ -582,7 +626,7 @@ public class MainActivity extends AppCompatActivity {
 //        posApiHelper.SysGetVersion(version);
 //        Log.w("HERE IS VERSION POS", version.toString());
     }
-    public void getDataSendData() {
+    public boolean getDataSendData() {
         try {
 //            String stringSenderEmail = "support@dalamaras.gr";
 //            String stringReceiverEmail = "innovation@dalamaras.gr";
@@ -594,14 +638,25 @@ public class MainActivity extends AppCompatActivity {
             String stringReceiverEmail = sharedPreferences.getString(notificationsFragment.KEY_RECEIVER_MAIL, "");
             String stringPasswordSenderEmail = sharedPreferences.getString(notificationsFragment.KEY_SENDER_PASSWORD, "");
 
+            if (stringSenderEmail == "" || stringSenderEmail == "" || stringPasswordSenderEmail == ""){
+                return false;
+            }
 
 
             Properties properties = System.getProperties();
+            String smtpHost = sharedPreferences.getString(notificationsFragment.KEY_SMTP_HOST, "");
+            String port = sharedPreferences.getString(notificationsFragment.KEY_PORT, "");
+            String sslEnable = sharedPreferences.getString(notificationsFragment.KEY_SSL, "");
+            String auth = sharedPreferences.getString(notificationsFragment.KEY_AUTH_ENABLE, "");
 
-            properties.put("mail.smtp.host", sharedPreferences.getString(notificationsFragment.KEY_SMTP_HOST, ""));
-            properties.put("mail.smtp.port", sharedPreferences.getString(notificationsFragment.KEY_PORT, ""));
-            properties.put("mail.smtp.ssl.enable", sharedPreferences.getString(notificationsFragment.KEY_SSL, ""));
-            properties.put("mail.smtp.auth", sharedPreferences.getString(notificationsFragment.KEY_AUTH_ENABLE, ""));
+            if (smtpHost == "" || port == "" || sslEnable == "" || auth ==""){
+                return false;
+            }
+
+            properties.put("mail.smtp.host", smtpHost);
+            properties.put("mail.smtp.port", port);
+            properties.put("mail.smtp.ssl.enable", sslEnable);
+            properties.put("mail.smtp.auth", auth);
 
 
             javax.mail.Session session = Session.getDefaultInstance(properties, new Authenticator() {
@@ -704,6 +759,7 @@ public class MainActivity extends AppCompatActivity {
         } catch (MessagingException e) {
             e.printStackTrace();
         }
+        return true;
     }
 
 
@@ -739,6 +795,7 @@ public class MainActivity extends AppCompatActivity {
         btemp = findViewById(R.id.invoiceButton);
         btemp.setBackgroundColor(GRAY);
         acceptedGDPR = "No";
+        lastCheckedRadioButton = null;
     }
 
     public void fillSettingsTextEdit(){

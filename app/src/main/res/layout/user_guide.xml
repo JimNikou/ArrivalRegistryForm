@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/textViewTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="User Guide"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/textViewContent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Proper use of the application requires the understanding
+of the user guide as long as the verbal instructions give to the customer at the
+date of the purchase."
+            android:paddingTop="10dp" />
+        <TextView
+            android:id="@+id/textViewTitleFields"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Fields"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/textViewContentFields"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Each field serves its purpose so filling the correct
+information and making sure the application works as intended before deployment is crucial."
+            android:paddingTop="10dp" />
+        <TextView
+            android:id="@+id/textViewTitleFieldsPass"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Password"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+        <TextView
+            android:id="@+id/textViewContentFieldsPass"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Setting your password allows you to safely access the
+settings and make changes. The password field has the ability to stay empty, meaning
+that you can save the password as none. This method IS NOT RECOMMENDED as it could lead
+to unauthorized access to others. Pressing the save password button, saves the changes
+and after the application restart, the user can input their own custom made password.
+If you forget the password, there is a hardcoded one which is 52525. It is recommended to
+write it down somewhere safe where you can access it in a lock out."
+            android:paddingTop="10dp" />
+        <TextView
+            android:id="@+id/textViewTitleFieldssmpt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="SMTP Host"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+        <TextView
+            android:id="@+id/textViewContentFieldssmtp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="ARF uses a mail server to send its mails to the customer.
+In this field you must input your SMTP Host name of your mail server."
+            android:paddingTop="10dp" />
+
+        <TextView
+            android:id="@+id/textViewTitleFieldsport"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Port"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+        <TextView
+            android:id="@+id/textViewContentFieldsport"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="As mentioned above, the application uses the mail server so
+filling the port is necessary for optimal and correct operation."
+            android:paddingTop="10dp" />
+        <TextView
+            android:id="@+id/textViewTitleFieldsssl"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="SSL Enable"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+        <TextView
+            android:id="@+id/textViewContentFieldssl"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="SSL (Secure Sockets Layer) is a standard security
+technology for establishing an encrypted link between a server
+and a client—typically a web server (website) and a browser, or a mail server and a mail client. SSL allows sensitive
+information such as credit card numbers, social security numbers, and
+login credentials to be transmitted securely. For correct use, the field accepts ONLY two values, true or false."
+            android:paddingTop="10dp" />
+        <TextView
+            android:id="@+id/textViewTitleFieldsauth"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Auth Enable"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+        <TextView
+            android:id="@+id/textViewContentFieldauth"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Authorization allows for a controlled environment,
+securing who is sending and receiving the information parsed in the mail. This field
+also accepts two values, either true or false."
+            android:paddingTop="10dp" />
+        <TextView
+            android:id="@+id/textViewTitleFieldssender"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sneder Mail"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+        <TextView
+            android:id="@+id/textViewContentFieldsender"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Sender Mail field refers to the mail that is responsible
+for sending out the mails."
+            android:paddingTop="10dp" />
+        <TextView
+            android:id="@+id/textViewTitleFieldssenderpass"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sneder Password"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+        <TextView
+            android:id="@+id/textViewContentFieldsenderpass"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Sender Password is also a required field that directly
+co-responds to the Sender Mail, meaning that the password must be of the Sender Mail."
+            android:paddingTop="10dp" />
+        <TextView
+            android:id="@+id/textViewTitleFieldsreceiver"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Receiver Mail"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+        <TextView
+            android:id="@+id/textViewContentFieldsreceiver"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Reveiver Mail field refers to the mail that is responsible
+for receiving the mails send by the Sender Mail."
+            android:paddingTop="10dp" />
+        <TextView
+            android:id="@+id/textViewTitleFieldsGDPR"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="GDPR"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+        <TextView
+            android:id="@+id/textViewContentFieldsGDPR"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="The General Data Protection Regulation (GDPR) is a comprehensive data protection law enacted by the European Union (EU). It was designed to give EU citizens more control over their personal data and to unify data protection laws across Europe. GDPR came into effect on May 25, 2018, replacing the 1995 Data Protection Directive.
+This field accepts as input a link, that redirect to your hotel's site. A QR Code will be created and put under the complete button in the Check-In Form where the customer can scan it and review your GDPR."
+            android:paddingTop="10dp" />
+        <TextView
+            android:id="@+id/textViewTitlebuttons"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Buttons"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+        <TextView
+            android:id="@+id/textViewTitleFieldssavepass"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Save Password"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+        <TextView
+            android:id="@+id/textViewContentFieldssavepass"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="The Save Password button saves only the password to the applications memory."
+            android:paddingTop="10dp" />
+        <TextView
+            android:id="@+id/textViewTitleFieldssaveall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Save Changes"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+        <TextView
+            android:id="@+id/textViewContentFieldssaveall"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="The Save Changes button saves all the other fields and switches in the applications memory."
+            android:paddingTop="10dp" />
+        <TextView
+            android:id="@+id/textViewTitleFieldsseeinfo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="See Info"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+        <TextView
+            android:id="@+id/textViewContentFieldsseeinfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="The See Info button appears all the values of the fields. If the values appear orange they are just for an example AND ARE NOT ACTUALLY REGISTERED. Every value appearing in black is registered in the system"
+            android:paddingTop="10dp" />
+        <TextView
+            android:id="@+id/textViewTitleFieldsuserguide"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="See Info"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+        <TextView
+            android:id="@+id/textViewContentFieldsuserguide"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="The How To Use button opens up this exact window and informs the user about the correct use of the application"
+            android:paddingTop="10dp" />
+        <TextView
+            android:id="@+id/textViewTitleSwitches"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Switches"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+        <TextView
+            android:id="@+id/textViewTitleFieldsuswitchprint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Enable Printing"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+        <TextView
+            android:id="@+id/textViewContentFieldswitchprint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="The Enable Printing switch enables the POS that the application is installed on, to print out a receipt of the exact data that was entered in the Check-In Form. When turned on, it has an orange color indicating that the changes need to be saved for the switch state to be applied. When the color is blue it means that it is applied and ready."
+            android:paddingTop="10dp" />
+        <TextView
+            android:id="@+id/textViewTitleFieldsuswitchemail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Enable E-mailing"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+        <TextView
+            android:id="@+id/textViewContentFieldswitchemail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="The Enable E-mailing switch enables the applicaiton to send out a mail of the exact data that was entered in the Check-In Form. When turned on, it has an orange color indicating that the changes need to be saved for the switch state to be applied. When the color is blue it means that it is applied and ready."
+            android:paddingTop="10dp" />
+
+    </LinearLayout>
+</ScrollView>
