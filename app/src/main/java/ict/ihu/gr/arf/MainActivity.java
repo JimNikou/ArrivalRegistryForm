@@ -142,12 +142,13 @@ public class MainActivity extends AppCompatActivity {
         }
 
         //gia to timeout me to license
-        Database db = new Database(MainActivity.this);
-        SharedPreferences date = getSharedPreferences("Date", 0);
+        if (!firstTime) {
+            Database db = new Database(MainActivity.this);
+            SharedPreferences date = getSharedPreferences("Date", 0);
 
-        //date comparison for license expiry---------------------------
-        SharedPreferences licenseExpiry = getSharedPreferences("LicenseExpiry", Context.MODE_PRIVATE);
-        String fullname = licenseExpiry.getString("fullname","");
+            //date comparison for license expiry---------------------------
+            SharedPreferences licenseExpiry = getSharedPreferences("LicenseExpiry", Context.MODE_PRIVATE);
+            String fullname = licenseExpiry.getString("fullname", "");
         db.getLicenseExpiryDate(fullname).addOnCompleteListener(new OnCompleteListener<Date>() {
             @Override
             public void onComplete(@NonNull Task<Date> task) {
@@ -166,7 +167,8 @@ public class MainActivity extends AppCompatActivity {
                         // Compare the dates
                         if (expiryDate.before(todayDate)) {
                             Log.d(TAG, "The license has expired.");
-                            showFirstTimeDialog(settings);
+                            if (!firstTime)
+                                showFirstTimeDialog(settings);
                         } else if (expiryDate.after(todayDate)) {
                             Log.d(TAG, "The license is valid.");
                         } else {
@@ -178,11 +180,12 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+        }
         //--------------------------------------------------------------------------
 
 
-        Log.d("license key", licenseExpiry.getString("key", ""));
-        Log.d("license key", licenseExpiry.getString("fullname", ""));
+//        Log.d("license key", licenseExpiry.getString("key", ""));
+//        Log.d("license key", licenseExpiry.getString("fullname", ""));
 
         invoiceButton = findViewById(R.id.invoiceButton);
         receiptButton = findViewById(R.id.receiptButton);
