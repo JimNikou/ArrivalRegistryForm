@@ -40,6 +40,7 @@ public class NotificationsFragment extends Fragment {
     private EditText senderMailTextEdit;
     private EditText senderPasswordTextEdit;
     private EditText receiverMailTextEdit;
+    private EditText linkGPDR;
 
     public static final String PREFS_NAME = "MyAppPrefs";
     public static final String KEY_SMTP_HOST = "smtpHost";
@@ -51,6 +52,7 @@ public class NotificationsFragment extends Fragment {
     public static final String KEY_RECEIVER_MAIL = "receiverMail";
     public static final String KEY_ENABLE_PRINTING = "enablePrinting";
     public static final String KEY_ENABLE_EMAILS = "enableEmails";
+    public static final String KEY_GPDR = "linkGPDR";
 
     private String tempPrint, tempEmailing;
     //==================================================================
@@ -76,6 +78,7 @@ public class NotificationsFragment extends Fragment {
         senderMailTextEdit = root.findViewById(R.id.senderMailTextEdit);
         senderPasswordTextEdit = root.findViewById(R.id.senderPasswordTextEdit);
         receiverMailTextEdit = root.findViewById(R.id.receiverMailTextEdit);
+        linkGPDR = root.findViewById(R.id.GDPReditText);
 
         loadPreferences(); //loading from memory
 
@@ -117,6 +120,7 @@ public class NotificationsFragment extends Fragment {
                 senderMailTextEdit.setText(sharedPreferences.getString(KEY_SENDER_MAIL, ""));
                 senderPasswordTextEdit.setText(sharedPreferences.getString(KEY_SENDER_PASSWORD, ""));
                 receiverMailTextEdit.setText(sharedPreferences.getString(KEY_RECEIVER_MAIL, ""));
+                linkGPDR.setText(sharedPreferences.getString(KEY_GPDR, ""));
             }
         });
 
@@ -148,6 +152,7 @@ public class NotificationsFragment extends Fragment {
         editor.putString(KEY_RECEIVER_MAIL, receiverMailTextEdit.getText().toString());
         editor.putBoolean(KEY_ENABLE_PRINTING, enablePrinting.isChecked());
         editor.putBoolean(KEY_ENABLE_EMAILS, enableEmails.isChecked());
+        editor.putString(KEY_GPDR, linkGPDR.getText().toString());
 
         editor.apply();
     }

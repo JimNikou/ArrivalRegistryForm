@@ -5,6 +5,7 @@ import static android.graphics.Color.GRAY;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -18,6 +19,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.Toast;
 
@@ -33,7 +35,13 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 import com.ctk.sdk.PosApiHelper;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.WriterException;
+import com.google.zxing.common.BitMatrix;
+import com.journeyapps.barcodescanner.BarcodeEncoder;
 import com.sunmi.printerx.PrinterSdk;
 import com.sunmi.printerx.SdkException;
 import com.sunmi.printerx.api.CanvasApi;
@@ -45,6 +53,8 @@ import com.sunmi.printerx.style.TextStyle;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
@@ -108,14 +118,71 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(binding.navView, navController);
 
+        //link for the GPDR in the checkbox text
+        SharedPreferences sharedPreferences = getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE);
+        String inputLink = sharedPreferences.getString(notificationsFragment.KEY_GPDR, "");
+//        Log.d("url", inputLink);
+        ImageView imageView = findViewById(R.id.qrimageView);
+        String agreementText = getString(R.string.link).replace("your_link_here", inputLink);
+        try {
+            Bitmap bitmap = generateQRCode(inputLink);
+            imageView.setImageBitmap(bitmap);
+        } catch (WriterException e) {
+            e.printStackTrace();
+        }
+//        tv.setText(Html.fromHtml(agreementText));
+//        tv.setMovementMethod(LinkMovementMethod.getInstance());
+
+
+        //first time license check after install
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
         boolean firstTime = settings.getBoolean(FIRST_TIME_KEY, true);
-//        Database db = new Database(MainActivity.this);
-//        boolean licenseExpired = db.licenseExpiry(db.licenseExpiryDate);
         if (firstTime) {
             showFirstTimeDialog(settings);
         }
 
+        //gia to timeout me to license
+        Database db = new Database(MainActivity.this);
+        SharedPreferences date = getSharedPreferences("Date", 0);
+
+        //date comparison for license expiry---------------------------
+        SharedPreferences licenseExpiry = getSharedPreferences("LicenseExpiry", Context.MODE_PRIVATE);
+        String fullname = licenseExpiry.getString("fullname","");
+        db.getLicenseExpiryDate(fullname).addOnCompleteListener(new OnCompleteListener<Date>() {
+            @Override
+            public void onComplete(@NonNull Task<Date> task) {
+                if (task.isSuccessful()) {
+                    Date expiryDate = task.getResult();
+                    if (expiryDate != null) {
+                        Log.d(TAG, "License Expiry Date: " + expiryDate.toString());
+                        // Get today's date without the time component
+                        Calendar calendar = Calendar.getInstance();
+                        calendar.set(Calendar.HOUR_OF_DAY, 0);
+                        calendar.set(Calendar.MINUTE, 0);
+                        calendar.set(Calendar.SECOND, 0);
+                        calendar.set(Calendar.MILLISECOND, 0);
+                        Date todayDate = calendar.getTime();
+
+                        // Compare the dates
+                        if (expiryDate.before(todayDate)) {
+                            Log.d(TAG, "The license has expired.");
+                            showFirstTimeDialog(settings);
+                        } else if (expiryDate.after(todayDate)) {
+                            Log.d(TAG, "The license is valid.");
+                        } else {
+                            Log.d(TAG, "The license expires today.");
+                        }
+                    }
+                } else {
+                    Log.e(TAG, "Task failed with exception: ", task.getException());
+                }
+            }
+        });
+        //--------------------------------------------------------------------------
+
+
+        Log.d("license key", licenseExpiry.getString("key", ""));
+        Log.d("license key", licenseExpiry.getString("fullname", ""));
 
         invoiceButton = findViewById(R.id.invoiceButton);
         receiptButton = findViewById(R.id.receiptButton);
@@ -287,6 +354,11 @@ public class MainActivity extends AppCompatActivity {
 //        Log.d("STATUS SUNMI", sunmiv2sPrinter.toString());
     }
 
+    private Bitmap generateQRCode(String url) throws WriterException {
+        BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
+        BitMatrix bitMatrix = barcodeEncoder.encode(url, BarcodeFormat.QR_CODE, 450, 450);
+        return barcodeEncoder.createBitmap(bitMatrix);
+    }
     private void showVATDialog() {
         // Inflate the dialog layout
         LayoutInflater inflater = LayoutInflater.from(this);
@@ -367,8 +439,6 @@ public class MainActivity extends AppCompatActivity {
                 String licenseKey = editTextLicenseKey.getText().toString().trim();
 
                 Database db = new Database(MainActivity.this);
-                Log.d("TAG", "1");
-
                 db.getData(fullName, licenseKey, new Database.DataCallback() {
                     @Override
                     public void onDataChecked(boolean isValid) {

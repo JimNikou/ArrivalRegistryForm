@@ -2,12 +2,15 @@ package ict.ihu.gr.arf;
 
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.TaskCompletionSource;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -23,7 +26,9 @@ import java.util.Map;
 public class Database {
     private static final String TAG = "DBLOGS";
     private Context context;
+    public String expiryDate;
     public Date licenseExpiryDate;
+    private SharedPreferences sharedPreferences;
     public Database(Context context){
         this.context = context;
     }
@@ -60,6 +65,11 @@ public class Database {
 
     public void getData(String customerFullName, String licenseKey, DataCallback callback) {
         FirebaseFirestore db = initializeDB();
+        sharedPreferences = context.getSharedPreferences("LicenseExpiry", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("key", licenseKey);
+        editor.putString("fullname", customerFullName);
+        editor.apply();
         documentExists(customerFullName, new DocumentExistsCallback() {
             @Override
             public void onCallback(boolean exists) {
@@ -96,6 +106,10 @@ public class Database {
         licenseExpiryDate = licenseExpiryTemp.toDate();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String licenseExpiry = sdf.format(licenseExpiryDate);
+        sharedPreferences = context.getSharedPreferences("Date", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("date", licenseExpiry);
+        editor.apply();
         Log.d(TAG, "Key is " + dbKey + " and is used is " + used + " expiring in " + licenseExpiry);
 
         return licenseKey.equals(dbKey) && !used; // Assuming key must match and should not be used
@@ -144,6 +158,35 @@ public class Database {
                     }
                 });
     }
+
+    public Task<Date> getLicenseExpiryDate(String fullname) {
+        FirebaseFirestore db = initializeDB();
+        DocumentReference docRef = db.collection("keys").document(fullname);
+        TaskCompletionSource<Date> taskCompletionSource = new TaskCompletionSource<>();
+
+        docRef.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                DocumentSnapshot document = task.getResult();
+                if (document.exists()) {
+                    Date expiryDate = document.getDate("licenseExpiryDate");
+                    if (expiryDate != null) {
+                        taskCompletionSource.setResult(expiryDate);
+                    } else {
+                        taskCompletionSource.setException(new Exception("Date is null"));
+                    }
+                } else {
+                    taskCompletionSource.setException(new Exception("No such document"));
+                    Log.d(TAG, "No such document");
+                }
+            } else {
+                taskCompletionSource.setException(task.getException());
+                Log.d(TAG, "get failed with ", task.getException());
+            }
+        });
+
+        return taskCompletionSource.getTask();
+    }
+
 
     public boolean licenseExpiry(Date licenseExpiryDate){
         Date currentDate = Calendar.getInstance().getTime();

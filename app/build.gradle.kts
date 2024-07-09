@@ -67,6 +67,12 @@ dependencies {
     implementation("com.sun.mail:android-activation:1.6.7")
     implementation("com.sunmi:printerx:1.0.15")
 
+    //qr code generation
+    implementation("com.google.zxing:core:3.4.1")
+    implementation("com.journeyapps:zxing-android-embedded:4.1.0")
+
+    implementation("com.google.android.gms:play-services-tasks:18.0.2")
+
     //firebase
     implementation(platform("com.google.firebase:firebase-bom:33.1.1"))
     implementation("com.google.firebase:firebase-analytics")
