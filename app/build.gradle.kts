@@ -49,6 +49,7 @@ android {
     packagingOptions {
         exclude("META-INF/NOTICE.md")
         exclude("META-INF/LICENSE.md")
+        exclude("META-INF/DEPENDENCIES")
     }
 }
 
@@ -72,13 +73,21 @@ dependencies {
     implementation("com.journeyapps:zxing-android-embedded:4.1.0")
 
     implementation("com.google.android.gms:play-services-tasks:18.0.2")
-
+    implementation("com.google.code.gson:gson:2.8.9")
     //firebase
     implementation(platform("com.google.firebase:firebase-bom:33.1.1"))
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-firestore")
 
+
+    implementation("com.google.api-client:google-api-client-android:1.32.1")
+    implementation("com.google.api-client:google-api-client-gson:1.32.1")
+    implementation("com.google.android.gms:play-services-auth:19.2.0")
+    implementation("com.google.api-client:google-api-client:2.0.0")
+    implementation("com.google.oauth-client:google-oauth-client-jetty:1.34.1")
+    implementation("com.google.apis:google-api-services-sheets:v4-rev20220927-2.0.0")
     // Include any additional dependencies required by the SDK here
     // For example, if the SDK comes with any jar or aar files, include them
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar", "*.aar", "*.aidl"))))
+
 }

@@ -15,7 +15,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -25,6 +27,10 @@ import androidx.core.widget.CompoundButtonCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import java.util.List;
+
+import ict.ihu.gr.arf.FormData;
+import ict.ihu.gr.arf.FormStorage;
 import ict.ihu.gr.arf.MainActivity;
 import ict.ihu.gr.arf.R;
 import ict.ihu.gr.arf.Utility;
@@ -69,6 +75,7 @@ public class NotificationsFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_settings, container, false);
 
+        Button showFormsButton = root.findViewById(R.id.FormHistoryButton);
         enablePrinting = root.findViewById(R.id.enablePrinting);
         enableEmails = root.findViewById(R.id.enableEmails);
         smtpHostTextEdit = root.findViewById(R.id.smtpHostTextEdit);
@@ -87,6 +94,13 @@ public class NotificationsFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 showUserGuide();
+            }
+        });
+
+        showFormsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showFormsPopup();
             }
         });
 
@@ -147,6 +161,45 @@ public class NotificationsFragment extends Fragment {
         return root;
     }
 
+    private void showFormsPopup() {
+        // Inflate the popup layout
+        LayoutInflater inflater = getLayoutInflater();
+        View popupView = inflater.inflate(R.layout.popup_forms, null);
+
+        // Find the LinearLayout inside the ScrollView
+        LinearLayout formsContainer = popupView.findViewById(R.id.forms_container);
+
+        // Get stored forms
+        List<FormData> storedForms = FormStorage.getStoredForms(requireContext());
+
+        // Populate the LinearLayout with form data
+        for (FormData formData : storedForms) {
+            TextView formTextView = new TextView(getContext());
+            formTextView.setText(
+                    "Full Name: " + formData.getFullName() + "\n" +
+                            "Street Address: " + formData.getStreetAddress() + "\n" +
+                            "Zip Code: " + formData.getZipCode() + "\n" +
+                            "Town: " + formData.getTown() + "\n" +
+                            "Email: " + formData.getEmail() + "\n" +
+                            "Phone Number: " + formData.getPhoneNumber() + "\n" +
+                            "ID Number: " + formData.getIdNo() + "\n" +
+                            "Nationality: " + formData.getNationality() + "\n" +
+                            "Date Time: " + formData.getDateTime() + "\n" +
+                        "Payment Type: " + formData.getPaymentType() + "\n" +
+                        formData.getDocumentType() + "\n"
+            );
+            formTextView.setPadding(0, 0, 0, 16); // Add some padding for spacing
+            formsContainer.addView(formTextView);
+        }
+
+        // Create and show the popup dialog
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setView(popupView)
+                .setTitle("Stored Forms")
+                .setPositiveButton("Close", null)
+                .show();
+    }
+
     private void showUserGuide() {
         // Inflate the custom layout
         LayoutInflater inflater = getLayoutInflater();
@@ -163,6 +216,7 @@ public class NotificationsFragment extends Fragment {
         AlertDialog dialog = builder.create();
         dialog.show();
     }
+
 
     private void savePreferences() {
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);

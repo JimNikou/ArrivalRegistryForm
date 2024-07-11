@@ -109,6 +109,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int NAVIGATION_HOME_ID = R.id.navigation_home;
     private static final int NAVIGATION_NOTIFICATIONS_ID = R.id.navigation_notifications;
     private int currentFragmentId = NAVIGATION_HOME_ID;
+    public boolean logForm = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -324,29 +325,35 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 SharedPreferences sharedPreferences = getSharedPreferences(notificationsFragment.PREFS_NAME, Context.MODE_PRIVATE);
-                printData();
+//                printData();
+//                boolean dataSentSuccessfully = false;
 
-                String now = String.valueOf(getDataSendData());
-                Log.d("now", now);
-                if(sharedPreferences.getBoolean(notificationsFragment.KEY_ENABLE_PRINTING, false)){
-                    print = false;
-                    if (getDataSendData()) {
+                // Check and send data only once
+//                dataSentSuccessfully = getDataSendData();
+                logForm = true;
+                if (getDataSendData()) {
+                    if (sharedPreferences.getBoolean(notificationsFragment.KEY_ENABLE_PRINTING, false)) {
+                        print = false;
+                        getDataSendData();
                         if (sunmiv2sPrinter != null) {
                             printLabel1ForSunmi(1);
                         } else {
                             printPOS_CS50();
                         }
                         Log.d("DATA", "enabled printing");
-                    } else {
-                        Toast.makeText(MainActivity.this, "Settings Fields not filled or correct", Toast.LENGTH_SHORT).show();
-
                     }
+
+                    if (sharedPreferences.getBoolean(notificationsFragment.KEY_ENABLE_EMAILS, false)) {
+                        print = true;
+                        getDataSendData();
+                        // No need to call getDataSendData() again
+                        Log.d("DATA", "enabled emailing");
+                    }
+                } else {
+                    Toast.makeText(MainActivity.this, "Settings Fields not filled or correct", Toast.LENGTH_SHORT).show();
                 }
-                if(sharedPreferences.getBoolean(notificationsFragment.KEY_ENABLE_EMAILS, false)){
-                    print = true;
-                    getDataSendData();
-                    Log.d("DATA", "enabled emailing");
-                }
+
+                logForm = false;
                 receipt = true;
                 clearSelections();
             }
@@ -545,8 +552,8 @@ public class MainActivity extends AppCompatActivity {
             int posY = 50;
             int lineHeight = 50;
 
-            api.initCanvas(BaseStyle.getStyle().setWidth(450).setHeight(2050));
-            api.renderArea(AreaStyle.getStyle().setStyle(Shape.BOX).setPosX(0).setPosY(0).setWidth(450).setHeight(2050));
+            api.initCanvas(BaseStyle.getStyle().setWidth(450).setHeight(2150));
+            api.renderArea(AreaStyle.getStyle().setStyle(Shape.BOX).setPosX(0).setPosY(0).setWidth(450).setHeight(2150));
             api.renderText("", TextStyle.getStyle().setTextSize(32).enableBold(true).setPosX(20).setPosY(70));
             api.renderText("---Registration Form---", TextStyle.getStyle().setTextSize(32).enableBold(true).setPosX(20).setPosY(5));
             for (String line : lines) {
@@ -615,7 +622,7 @@ public class MainActivity extends AppCompatActivity {
         posApiHelper.PrintStr(" \n");
         posApiHelper.PrintStr("-------------------------------------\n");
         posApiHelper.PrintStr("Signing this document I acknowledge the Terms & Conditions listed in the hotel site." +
-                "Υπογράφοντας την απόδειξη αυτη συναινώ στους Όρους και τις Προϋποθέσεις οπου αναγράφονται στην ιστοσελίδα του" +
+                "Υπογράφοντας την απόδειξη αυτη συναινώ στους Όρους και τις Προϋποθέσεις όπου αναγράφονται στην ιστοσελίδα του " +
                 "ξενοδοχείου. \n");
         posApiHelper.PrintStr(" \n");
         posApiHelper.PrintStart();
@@ -715,6 +722,8 @@ public class MainActivity extends AppCompatActivity {
                 formattedDateTime = currentDateTime.format(formatter);
             }
 
+
+
             String emailSubject = "Δελτίο Άφιξης " + formattedDateTime + " " + FullName;
             String emailBody = "Full Name: " + FullName + "\n" +
                     "Street Address: " + StreetAddress + "\n" +
@@ -725,13 +734,26 @@ public class MainActivity extends AppCompatActivity {
                     "ID Number: " + IdNo + "\n" +
                     "Nationality: " + Nationality + "\n" +
                     "Payment Type: " + PaymentType + "\n" +
-                    "Accepted GDPR: " + acceptedGDPR + "\n";
+                    "Accepted GDPR: " + acceptedGDPR + "\n" +
+                    "Time Issued: " + formattedDateTime + "\n" ;
 
             Button receiptRB = findViewById(R.id.receiptButton);
             if(invoice){
                 emailBody = emailBody + "Invoice VAT: " + vatNumber +"\n";
+                String documentType = "Invoice VAT: " + vatNumber;
+                if (logForm) {
+                    FormData formData = new FormData(FullName, StreetAddress, ZipCode, Town, Email, PhoneNumber, IdNo, Nationality, formattedDateTime, PaymentType, documentType);
+                    FormStorage.saveForm(this, formData);
+                    logForm = false;
+                }
             } else if (receipt) {
                 emailBody = emailBody + "Document: Receipt" + "\n";
+                String documentType = "Document: Receipt";
+                if (logForm) {
+                    FormData formData = new FormData(FullName, StreetAddress, ZipCode, Town, Email, PhoneNumber, IdNo, Nationality, formattedDateTime, PaymentType, documentType);
+                    FormStorage.saveForm(this, formData);
+                    logForm = false;
+                }
             }
 
             infoToPrint = emailBody;
@@ -762,6 +784,15 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+
+    public void displayStoredForms() {
+        List<FormData> storedForms = FormStorage.getStoredForms(this);
+        for (FormData formData : storedForms) {
+            Log.d("StoredForm", "Full Name: " + formData.fullName);
+            Log.d("StoredForm", "Street Address: " + formData.streetAddress);
+            // Log other fields as needed
+        }
+    }
 
     void clearSelections(){
         receipt = true;
