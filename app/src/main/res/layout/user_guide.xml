@@ -268,6 +268,20 @@ This field accepts as input a link, that redirect to your hotel's site. A QR Cod
             android:layout_height="wrap_content"
             android:text="The Enable E-mailing switch enables the applicaiton to send out a mail of the exact data that was entered in the Check-In Form. When turned on, it has an orange color indicating that the changes need to be saved for the switch state to be applied. When the color is blue it means that it is applied and ready."
             android:paddingTop="10dp" />
+        <TextView
+            android:id="@+id/textViewTitleFormHistory"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Form History"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+        <TextView
+            android:id="@+id/textViewTitleFieldhistory"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="After a form is being sent to your mail, it is also temporary stored in the See Form History button. When you press it, you can see the 20 latest forms exactly as they where sent to your mail."
+            android:textSize="15sp"
+            android:textStyle="bold" />
 
     </LinearLayout>
 </ScrollView>

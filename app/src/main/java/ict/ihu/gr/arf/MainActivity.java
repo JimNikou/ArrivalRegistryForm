@@ -2,13 +2,17 @@ package ict.ihu.gr.arf;
 
 import static android.graphics.Color.GRAY;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.RemoteException;
+import android.preference.PreferenceManager;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -24,6 +28,7 @@ import android.widget.RadioButton;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
@@ -51,14 +56,22 @@ import com.sunmi.printerx.style.AreaStyle;
 import com.sunmi.printerx.style.BaseStyle;
 import com.sunmi.printerx.style.TextStyle;
 
+import org.pgpainless.sop.SOPImpl;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
 import javax.mail.Authenticator;
+import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
@@ -70,11 +83,14 @@ import javax.mail.internet.MimeMessage;
 import ict.ihu.gr.arf.databinding.ActivityMainBinding;
 import ict.ihu.gr.arf.ui.SharedViewModel;
 import ict.ihu.gr.arf.ui.notifications.NotificationsFragment;
+import sop.SOP;
+//import sop.SOP;
 
 public class MainActivity extends AppCompatActivity {
 
     // shared view model for more info function, used to get the SharedViewModel
     private SharedViewModel sharedViewModel;
+    private byte[] publicKey;
     private static final String PREFS_NAME = "LicenseCheck";
     private static final String FIRST_TIME_KEY = "firstTime";
     private static final String TAG = "MainActivity";
@@ -97,6 +113,7 @@ public class MainActivity extends AppCompatActivity {
     private String acceptedGDPR = "Yes";
     private RadioButton rbPaymentTypeCard;
     private RadioButton rbPaymentTypeCash;
+//    private RSAEncryptor rsa;
     private RadioButton lastCheckedRadioButton = null;
     public String[] lines;
     private boolean letPrint = false;
@@ -114,6 +131,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
@@ -124,6 +142,12 @@ public class MainActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(binding.navView, navController);
+
+        //get saved public key
+        Button insertPublicKey = findViewById(R.id.insertPublicKey);
+        insertPublicKey.setVisibility(View.GONE);
+
+
 
         //link for the GDPR in the checkbox text
         SharedPreferences sharedPreferences = getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE);
@@ -144,7 +168,13 @@ public class MainActivity extends AppCompatActivity {
         //first time license check after install
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
         boolean firstTime = settings.getBoolean(FIRST_TIME_KEY, true);
+//        rsa = new RSAEncryptor(getApplicationContext());
+
         if (firstTime) {
+            insertPublicKey.setVisibility(View.VISIBLE);
+            insertPublicKey.setOnClickListener(v ->{
+                openFileManager();
+            });
             showFirstTimeDialog(settings);
         }
 
@@ -193,6 +223,8 @@ public class MainActivity extends AppCompatActivity {
 
 //        Log.d("license key", licenseExpiry.getString("key", ""));
 //        Log.d("license key", licenseExpiry.getString("fullname", ""));
+
+
 
         invoiceButton = findViewById(R.id.invoiceButton);
         receiptButton = findViewById(R.id.receiptButton);
@@ -633,6 +665,43 @@ public class MainActivity extends AppCompatActivity {
 //        posApiHelper.SysGetVersion(version);
 //        Log.w("HERE IS VERSION POS", version.toString());
     }
+    public void sendEncryptedEmail(Session session, String to, String from, String emailBody, String emailSubject, byte[] recipientCert) {
+        try {
+            Log.d("Email", "Starting email encryption process");
+
+            // Initialize PGPainless SOP
+            SOP sop = new SOPImpl();
+
+            Log.d("Email", "Loaded recipient's public key");
+
+            // Encrypt the email body
+            byte[] encryptedBody = sop.encrypt()
+                    .withCert(recipientCert)
+                    .plaintext(emailBody.getBytes(StandardCharsets.UTF_8))
+                    .getBytes();
+
+            Log.d("Email", "Email body encrypted");
+
+            // Create MIME message
+            MimeMessage mimeMessage = new MimeMessage(session);
+            mimeMessage.setFrom(new InternetAddress(from));
+            mimeMessage.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to));
+            mimeMessage.setSubject(emailSubject);
+
+            // Set the encrypted message as the email body
+            mimeMessage.setText(new String(encryptedBody, StandardCharsets.UTF_8), "UTF-8");
+
+            // Save changes in background
+            new SaveAndSendEmailTask(session, mimeMessage).execute();
+
+        } catch (Exception e) {
+            Log.e("Email", "Error in sending encrypted email", e);
+        }
+    }
+
+
+
+
     public boolean getDataSendData() {
         try {
 //            String stringSenderEmail = "support@dalamaras.gr";
@@ -674,6 +743,7 @@ public class MainActivity extends AppCompatActivity {
             });
 
             MimeMessage mimeMessage = new MimeMessage(session);
+            mimeMessage.setFrom(new InternetAddress(stringSenderEmail));
             mimeMessage.addRecipient(MimeMessage.RecipientType.TO, new InternetAddress(stringReceiverEmail));
 
 
@@ -756,34 +826,192 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
 
-            infoToPrint = emailBody;
-            mimeMessage.setSubject(emailSubject);
-            mimeMessage.setText(emailBody);
 
+            infoToPrint = emailBody;
+
+
+
+            // Send encrypted email
             if (print) {
-                Thread thread = new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            Transport.send(mimeMessage);
-                        } catch (MessagingException e) {
-                            e.printStackTrace();
-                        }
+                Uri savedUri = getSavedFileUri();
+                if (savedUri != null) {
+                    try {
+                        publicKey = readBytesFromUri(savedUri);
+                        sendEncryptedEmail(session, stringReceiverEmail, stringSenderEmail, emailBody, emailSubject, publicKey);
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
-                });
-                thread.start();
-                print = false;
+                }
             }
+            // Split the email body into smaller chunks
+//            List<String> parts = splitIntoChunks(emailBody, 117); // 117 bytes for 1024-bit RSA with PKCS1 padding
+//
+//            // Encrypt each chunk separately
+//            StringBuilder encryptedBodyBuilder = new StringBuilder();
+//            for (String part : parts) {
+//                encryptedBodyBuilder.append(rsa.encrypt(part)).append(";");
+//            }
+
+//            String encryptedBody = encryptedBodyBuilder.toString();
+//            SOP sop = new SOPImpl();
+//            byte[] bobCert = loadKeyFromAssets(this, "public_key.asc");
+//            byte[] plaintext = emailBody.getBytes(); // plaintext
+//            byte[] plaintext2 = emailSubject.getBytes();
+//            byte[] ciphertextBody = sop.encrypt()
+//                    // encrypt for each recipient
+//                    .withCert(bobCert)
+//                    .plaintext(plaintext)
+//                    .getBytes();
+//
+//            byte[] ciphertextTitle = sop.encrypt()
+//                    // encrypt for each recipient
+//                    .withCert(bobCert)
+//                    .plaintext(plaintext2)
+//                    .getBytes();
+//            Log.d("plz", ciphertextTitle.toString());
+//            Log.d("plz", ciphertextBody.toString());
+//
+////            String base64EncryptedData = Base64.getEncoder().encodeToString(ciphertextBody);
+////            String base64EncryptedData2 = Base64.getEncoder().encodeToString(ciphertextTitle);
+//
+//            mimeMessage.setSubject("Encrypted try");
+//            MimeMultipart multipart = new MimeMultipart();
+//
+//            // Create a body part for the encrypted data
+//            MimeBodyPart encryptedPart = new MimeBodyPart();
+//            encryptedPart.setContent(new String(ciphertextBody), "application/pgp-encrypted");
+//
+//            MimeBodyPart pgpPart = new MimeBodyPart();
+//            pgpPart.setContent(new String(ciphertextBody), "application/octet-stream; name=\"public_key.asc\"");
+//            pgpPart.setHeader("Content-Description", "OpenPGP encrypted message");
+//            pgpPart.setHeader("Content-Disposition", "inline; filename=\"public_key.asc\"");
+//            pgpPart.setHeader("Content-Transfer-Encoding", "7bit");
+//            pgpPart.setHeader("Content-Type", "application/octet-stream; name=\"public_key.asc\"");
+//
+//            // Add parts to the multipart
+//            multipart.addBodyPart(encryptedPart);
+//            multipart.addBodyPart(pgpPart);
+//            mimeMessage.setContent(multipart);
+
+//            mimeMessage.setText(base64EncryptedData);
+
 
 
         } catch (AddressException e) {
             e.printStackTrace();
         } catch (MessagingException e) {
             e.printStackTrace();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
         return true;
     }
 
+    private static final int PICK_KEY_FILE = 1001;
+    private static final String PREF_SELECTED_FILE_URI = "selected_file_uri";
+    public void openFileManager() {
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.setType("*/*");  // All file types
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, false);
+        intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
+        startActivityForResult(intent, PICK_KEY_FILE);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == PICK_KEY_FILE && resultCode == Activity.RESULT_OK) {
+            if (data != null && data.getData() != null) {
+                Uri uri = data.getData();
+
+                try {
+                    // Persist URI permission if it supports it
+                    getContentResolver().takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+                    // Save URI in SharedPreferences
+                    saveUri(uri);
+
+                    // Use the URI to access the file content
+                    byte[] fileBytes = readBytesFromUri(uri);
+                } catch (SecurityException e) {
+                    e.printStackTrace();
+                    Toast.makeText(this, "Failed to persist URI permission: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Toast.makeText(this, "Error reading file: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                Toast.makeText(this, "No file selected", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    private void saveUri(Uri uri) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putString(PREF_SELECTED_FILE_URI, uri.toString());
+        editor.apply();
+    }
+
+    private Uri getSavedFileUri() {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        String uriString = preferences.getString(PREF_SELECTED_FILE_URI, null);
+        if (uriString != null) {
+            return Uri.parse(uriString);
+        }
+        return null;
+    }
+
+    public byte[] readBytesFromUri(Uri uri) throws IOException {
+        InputStream inputStream = getContentResolver().openInputStream(uri);
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        if (inputStream != null) {
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = inputStream.read(buffer)) != -1) {
+                byteArrayOutputStream.write(buffer, 0, length);
+            }
+            inputStream.close();
+            return byteArrayOutputStream.toByteArray();
+        } else {
+            throw new IOException("InputStream is null for URI: " + uri.toString());
+        }
+    }
+
+
+    private class SaveAndSendEmailTask extends AsyncTask<Void, Void, Void> {
+        private Session session;
+        private MimeMessage mimeMessage;
+
+        public SaveAndSendEmailTask(Session session, MimeMessage mimeMessage) {
+            this.session = session;
+            this.mimeMessage = mimeMessage;
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            try {
+                Log.d("Email", "Saving changes and sending email in background");
+                mimeMessage.saveChanges();
+                Transport.send(mimeMessage);
+                Log.d("Email", "Email sent successfully");
+            } catch (MessagingException e) {
+                Log.e("Email", "Error in sending email", e);
+            }
+            return null;
+        }
+    }
+
+    private List<String> splitIntoChunks(String text, int chunkSize) {
+        List<String> chunks = new ArrayList<>();
+        int length = text.length();
+        for (int i = 0; i < length; i += chunkSize) {
+            chunks.add(text.substring(i, Math.min(length, i + chunkSize)));
+        }
+        return chunks;
+    }
 
     public void displayStoredForms() {
         List<FormData> storedForms = FormStorage.getStoredForms(this);

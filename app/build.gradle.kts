@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId = "ict.ihu.gr.arf"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -79,6 +79,11 @@ dependencies {
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-firestore")
 
+//    implementation("org.bouncycastle:bcpkix-jdk15on:1.70")
+//    implementation("org.bouncycastle:bcpg-jdk15on:1.70")
+//    implementation("org.bouncycastle:bcprov-jdk15on:1.70")
+    implementation("org.pgpainless:pgpainless-sop:1.6.2")
+//    implementation("javax.mail:mail:1.4.7")
 
     implementation("com.google.api-client:google-api-client-android:1.32.1")
     implementation("com.google.api-client:google-api-client-gson:1.32.1")

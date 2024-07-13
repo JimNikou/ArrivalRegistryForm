@@ -97,6 +97,15 @@ public class NotificationsFragment extends Fragment {
             }
         });
 
+//        Button getPublicKey = root.findViewById(R.id.getPublicKeyButton);
+//        getPublicKey.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                MainActivity ma = new MainActivity();
+//                mainActivity.openFileManager();
+//            }
+//        });
+
         showFormsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -161,6 +170,36 @@ public class NotificationsFragment extends Fragment {
         return root;
     }
 
+    private void openFileManager() {
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("*/*");
+        startActivityForResult(intent, 1);
+    }
+
+
+
+
+
+
+    private void showTextDialog(Context context, String longText) {
+        // Inflate the dialog layout
+        LayoutInflater inflater = LayoutInflater.from(context);
+        View dialogView = inflater.inflate(R.layout.dialog_text_display, null);
+        EditText editText = dialogView.findViewById(R.id.editText);
+        editText.setText(longText);
+        editText.setKeyListener(null);  // Make the EditText non-editable
+        editText.setFocusable(true);
+        editText.setCursorVisible(true);
+        editText.setFocusableInTouchMode(true);
+
+        // Create the dialog
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
+        dialogBuilder.setView(dialogView)
+                .setNegativeButton("Close", (dialog, which) -> dialog.dismiss())
+                .create()
+                .show();
+    }
     private void showFormsPopup() {
         // Inflate the popup layout
         LayoutInflater inflater = getLayoutInflater();

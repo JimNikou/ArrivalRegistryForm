@@ -9,5 +9,8 @@
     <string name="agreement">I agree and I understand the Terms &amp; Conditions mentioned on the hotel site under <a href="your_link_here">here</a>. You can scan the QR Code under the complete button to be re-directed there.</string>
     <string name="link"><a href="https://esperideshotel.gr/en/legal/terms-of-use">GDPR Terms and Conditions</a></string>
     <string name="google_sheets_client_id">573771552405-0hfdvqof33lnu4vdqll839gsrnv7cu9g.apps.googleusercontent.com</string>
+    <string name="warning_string"><a href="">WARNING!</a> Before proceding with the license check make sure that you have downloaded
+    your public key file that ends with .asc . When your license gets accepted <a href="">DO NOT</a> close the application and imediatly click on the
+    red button to insert your public key file. After that you are set to go and continue with configuring your settings.</string>
 
 </resources>

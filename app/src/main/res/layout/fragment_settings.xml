@@ -321,6 +321,7 @@
                     android:layout_marginLeft="10dp"
                     android:paddingLeft="16dp"
                     android:text="See Form History" />
+
             </TableRow>
 
             <TableRow
