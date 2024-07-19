@@ -91,6 +91,17 @@ dependencies {
     implementation("com.google.api-client:google-api-client:2.0.0")
     implementation("com.google.oauth-client:google-oauth-client-jetty:1.34.1")
     implementation("com.google.apis:google-api-services-sheets:v4-rev20220927-2.0.0")
+
+    implementation("com.google.android.material:material:1.4.0")
+
+    //ftp stuff
+    implementation("commons-net:commons-net:3.6")
+
+    implementation("androidx.work:work-runtime:2.7.1")
+    implementation("com.amitshekhar.android:android-networking:1.0.2")
+
+//    implementation("com.github.amitshekhariitbhu.Fast-Android-Networking:android-networking:v1.0.2")
+
     // Include any additional dependencies required by the SDK here
     // For example, if the SDK comes with any jar or aar files, include them
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar", "*.aar", "*.aidl"))))

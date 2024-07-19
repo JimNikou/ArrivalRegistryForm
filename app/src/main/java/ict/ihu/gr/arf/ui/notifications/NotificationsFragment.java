@@ -1,6 +1,8 @@
 package ict.ihu.gr.arf.ui.notifications;
 //package ict.ihu.gr.arf;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -14,6 +16,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Switch;
@@ -67,6 +70,26 @@ public class NotificationsFragment extends Fragment {
     private static final String PASSWORD_KEY = "notification_password";
     private static final String DEFAULT_PASSWORD = "52525";
     private static final int ACTIVATED_SWITCH_COLOR = Color.parseColor("#E68369");
+    private NotificationsFragmentListener listener;
+
+    public interface NotificationsFragmentListener {
+        void openFileManager();
+    }
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        if (context instanceof NotificationsFragmentListener) {
+            listener = (NotificationsFragmentListener) context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement NotificationsFragmentListener");
+        }
+    }
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        listener = null;
+    }
 
     private Switch enablePrinting, enableEmails;
 
@@ -75,7 +98,6 @@ public class NotificationsFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_settings, container, false);
 
-        Button showFormsButton = root.findViewById(R.id.FormHistoryButton);
         enablePrinting = root.findViewById(R.id.enablePrinting);
         enableEmails = root.findViewById(R.id.enableEmails);
         smtpHostTextEdit = root.findViewById(R.id.smtpHostTextEdit);
@@ -87,6 +109,13 @@ public class NotificationsFragment extends Fragment {
         receiverMailTextEdit = root.findViewById(R.id.receiverMailTextEdit);
         linkGPDR = root.findViewById(R.id.GDPReditText);
 
+
+        if (smtpHostTextEdit == null || portTextEdit == null || sslTextEdit == null ||
+                authEnableTextEdit == null || senderMailTextEdit == null || senderPasswordTextEdit == null ||
+                receiverMailTextEdit == null || linkGPDR == null) {
+            throw new RuntimeException("Failed to initialize one or more EditTexts");
+        }
+
         loadPreferences(); //loading from memory
 
         Button buttonShowGuide = root.findViewById(R.id.howToUseButton);
@@ -97,19 +126,15 @@ public class NotificationsFragment extends Fragment {
             }
         });
 
-//        Button getPublicKey = root.findViewById(R.id.getPublicKeyButton);
-//        getPublicKey.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                MainActivity ma = new MainActivity();
-//                mainActivity.openFileManager();
-//            }
-//        });
 
-        showFormsButton.setOnClickListener(new View.OnClickListener() {
+
+        Button addPublicKey = root.findViewById(R.id.addPublicKeyButton);
+        addPublicKey.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showFormsPopup();
+                if (listener != null) {
+                    listener.openFileManager();
+                }
             }
         });
 
@@ -118,42 +143,84 @@ public class NotificationsFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 savePreferences();
+                showRestartDialog();
             }
         });
 
         setSwitchColor(enablePrinting);
         setSwitchColor(enableEmails);
+
+        enableEmails.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                SharedPreferences sharedPreferences = getActivity().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putBoolean(KEY_ENABLE_PRINTING, enablePrinting.isChecked());
+                editor.putBoolean(KEY_ENABLE_EMAILS, enableEmails.isChecked());
+                editor.apply();
+            }
+        });
+
+        enablePrinting.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                SharedPreferences sharedPreferences = getActivity().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putBoolean(KEY_ENABLE_PRINTING, enablePrinting.isChecked());
+                editor.putBoolean(KEY_ENABLE_EMAILS, enableEmails.isChecked());
+                editor.apply();
+            }
+        });
+
         Button savePasswordButton = root.findViewById(R.id.save_changes_button);
         savePasswordButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                EditText passwordEditText = root.findViewById(R.id.customPasswordTextEdit);
-                String password = passwordEditText.getText().toString();
-                savePassword(password);
-                Toast.makeText(getActivity(), "Changes Saved!", Toast.LENGTH_SHORT).show();
+                // Inflate the dialog layout
+                View dialogView = getLayoutInflater().inflate(R.layout.dialog_password_settings, null);
+
+                // Find views inside the dialog
+                EditText newPasswordEditText = dialogView.findViewById(R.id.newPasswordEditText);
+                EditText confirmPasswordEditText = dialogView.findViewById(R.id.confirmPasswordEditText);
+                Button savePasswordDialogButton = dialogView.findViewById(R.id.savePasswordDialogButton);
+
+                // Create the AlertDialog
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                builder.setView(dialogView);
+                builder.setTitle("Set New Password");
+
+                // Create and show the dialog
+                AlertDialog dialog = builder.create();
+                dialog.show();
+
+                // Handle click on save button in dialog
+                savePasswordDialogButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        String newPassword = newPasswordEditText.getText().toString();
+                        String confirmPassword = confirmPasswordEditText.getText().toString();
+
+                        // Check if passwords match and not empty
+                        if (newPassword.isEmpty() || confirmPassword.isEmpty()) {
+                            Toast.makeText(getActivity(), "Passwords cannot be empty", Toast.LENGTH_SHORT).show();
+                        } else if (!newPassword.equals(confirmPassword)) {
+                            Toast.makeText(getActivity(), "Passwords do not match", Toast.LENGTH_SHORT).show();
+                        } else {
+                            // Save the password
+                            savePassword(newPassword);
+
+                            // Dismiss the dialog
+                            dialog.dismiss();
+
+                            // Optionally, you can notify the user that the password was saved
+                            Toast.makeText(getActivity(), "Password saved successfully", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
             }
         });
 
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
-
-        Button seeInfoButton = root.findViewById(R.id.seeInfoButton);
-        seeInfoButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                sharedViewModel.triggerFillSettings();
-
-                //na to allaxw auto
-                SharedPreferences sharedPreferences = getActivity().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-                smtpHostTextEdit.setText(sharedPreferences.getString(KEY_SMTP_HOST, ""));
-                portTextEdit.setText(sharedPreferences.getString(KEY_PORT, ""));
-                sslTextEdit.setText(sharedPreferences.getString(KEY_SSL, ""));
-                authEnableTextEdit.setText(sharedPreferences.getString(KEY_AUTH_ENABLE, ""));
-                senderMailTextEdit.setText(sharedPreferences.getString(KEY_SENDER_MAIL, ""));
-                senderPasswordTextEdit.setText(sharedPreferences.getString(KEY_SENDER_PASSWORD, ""));
-                receiverMailTextEdit.setText(sharedPreferences.getString(KEY_RECEIVER_MAIL, ""));
-                linkGPDR.setText(sharedPreferences.getString(KEY_GPDR, ""));
-            }
-        });
 
         root.findViewById(R.id.ScrollView).setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -167,9 +234,9 @@ public class NotificationsFragment extends Fragment {
         });
 
         promptForPassword();
+
         return root;
     }
-
     private void openFileManager() {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
@@ -180,7 +247,20 @@ public class NotificationsFragment extends Fragment {
 
 
 
+    public void fillFields(){
+        sharedViewModel.triggerFillSettings();
 
+        //na to allaxw auto
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        smtpHostTextEdit.setText(sharedPreferences.getString(KEY_SMTP_HOST, ""));
+        portTextEdit.setText(sharedPreferences.getString(KEY_PORT, ""));
+        sslTextEdit.setText(sharedPreferences.getString(KEY_SSL, ""));
+        authEnableTextEdit.setText(sharedPreferences.getString(KEY_AUTH_ENABLE, ""));
+        senderMailTextEdit.setText(sharedPreferences.getString(KEY_SENDER_MAIL, ""));
+        senderPasswordTextEdit.setText(sharedPreferences.getString(KEY_SENDER_PASSWORD, ""));
+        receiverMailTextEdit.setText(sharedPreferences.getString(KEY_RECEIVER_MAIL, ""));
+        linkGPDR.setText(sharedPreferences.getString(KEY_GPDR, ""));
+    }
 
     private void showTextDialog(Context context, String longText) {
         // Inflate the dialog layout
@@ -320,6 +400,7 @@ public class NotificationsFragment extends Fragment {
                 if (enteredPassword.equals(savedPassword) || enteredPassword.equals(hardcodedPassword)) {
                     // Password is correct, proceed to notifications page
                     Toast.makeText(getActivity(), "Access Granted", Toast.LENGTH_SHORT).show();
+                    fillFields();
                 } else {
                     Toast.makeText(getActivity(), "Incorrect Password", Toast.LENGTH_SHORT).show();
                     navigateToHome();
@@ -361,6 +442,27 @@ public class NotificationsFragment extends Fragment {
         }
     }
 
+    // Method to show a dialog informing the user to restart the application
+    private void showRestartDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle("Changes Saved");
+        builder.setMessage("Please restart the application for changes to take effect.");
+        builder.setPositiveButton("Restart", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                closeApp();
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
     private void navigateToHome() {
         try {
             Context context = getActivity();
@@ -379,6 +481,28 @@ public class NotificationsFragment extends Fragment {
         } catch (Exception e) {
             e.printStackTrace();
             Toast.makeText(getActivity(), "Error navigating to Home", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void closeApp(){
+        try {
+            Context context = getActivity();
+            if (context != null) {
+                Intent intent = context.getPackageManager().getLaunchIntentForPackage(context.getPackageName());
+                if (intent != null) {
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    int pendingIntentId = 123456;
+                    PendingIntent pendingIntent = PendingIntent.getActivity(
+                            context, pendingIntentId, intent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+                    AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+                    alarmManager.set(AlarmManager.RTC, System.currentTimeMillis() + 1000, pendingIntent);
+                    getActivity().finish();
+                    System.exit(0);  // Ensure the app process is killed
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(getActivity(), "Error restarting the app", Toast.LENGTH_SHORT).show();
         }
     }
 

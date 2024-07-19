@@ -3,20 +3,36 @@ package ict.ihu.gr.arf.ui.notifications;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import androidx.appcompat.app.AlertDialog;
-import androidx.fragment.app.DialogFragment;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import ict.ihu.gr.arf.MainActivity;
+import androidx.appcompat.app.AlertDialog;
+import androidx.fragment.app.DialogFragment;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModel;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
+
 import ict.ihu.gr.arf.R;
 
 public class PasswordDialogFragment extends DialogFragment {
+
+    public class SharedViewModel extends ViewModel {
+        private final MutableLiveData<Boolean> fillFieldsTrigger = new MutableLiveData<>();
+
+        public void triggerFillFields() {
+            fillFieldsTrigger.setValue(true);
+        }
+
+        public LiveData<Boolean> getFillFieldsTrigger() {
+            return fillFieldsTrigger;
+        }
+    }
+
 
     private static final String CORRECT_PASSWORD = "52525";
     private static final String TAG = "PasswordDialogFragment";
@@ -38,6 +54,8 @@ public class PasswordDialogFragment extends DialogFragment {
                         String enteredPassword = passwordEditText.getText().toString();
                         if (enteredPassword.equals(CORRECT_PASSWORD)) {
                             Toast.makeText(getActivity(), "Access Granted", Toast.LENGTH_SHORT).show();
+                            NotificationsFragment nf = new NotificationsFragment();
+                            nf.fillFields();
                         } else {
                             Log.w(TAG, "Incorrect password");
                             Toast.makeText(getActivity(), "Incorrect Password", Toast.LENGTH_SHORT).show();

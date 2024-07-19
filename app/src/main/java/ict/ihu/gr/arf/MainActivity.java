@@ -4,13 +4,20 @@ import static android.graphics.Color.GRAY;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.text.Editable;
@@ -25,12 +32,15 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
@@ -56,6 +66,8 @@ import com.sunmi.printerx.style.AreaStyle;
 import com.sunmi.printerx.style.BaseStyle;
 import com.sunmi.printerx.style.TextStyle;
 
+import org.apache.commons.net.ftp.FTP;
+import org.apache.commons.net.ftp.FTPClient;
 import org.pgpainless.sop.SOPImpl;
 
 import java.io.ByteArrayOutputStream;
@@ -86,10 +98,38 @@ import ict.ihu.gr.arf.ui.notifications.NotificationsFragment;
 import sop.SOP;
 //import sop.SOP;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements NotificationsFragment.NotificationsFragmentListener{
+
+//    private static final String CURRENT_APP_VERSION = "0.0.1";
+//    private static final String FTP_SERVER = "ftp.example.com";
+//    private static final String FTP_USERNAME = "username";
+//    private static final String FTP_PASSWORD = "password";
+//    private static final String FTP_VERSION_FILE_PATH = "/version.txt";
+//    private static final String FTP_APK_PATH = "/ARF_0.0.2v.apk";
+//    private static final int PERMISSION_REQUEST_CODE = 100;
+
+    private static final String FTP_SERVER = "185.138.42.40";
+    private static final String FTP_USER = "anavathmisi";
+    private static final String FTP_PASS = "5yZ5o*z40";
+    private static final String VERSION_FILE_PATH = "/version.txt";
+    private static final String APK_FILE_PATH = "/arfRelease.apk";
+//    private static String CURRENT_APP_VERSION = "0.0.2";
+
+    private static final int PERMISSION_REQUEST_CODE = 1;
+    private static final String fileUrl = "ftp://anavathmisi:5yZ5o*z40@185.138.42.40/arfRelease.apk";
+    private static final String fileName = "arfRelease.apk";
+    private static final int FTP_PORT = 21; // Default FTP port
+    private static final String FTP_REMOTE_DIRECTORY = "/"; // Directory on FTP server where files are located
+
+    private static final String CURRENT_VERSION = "0.0.2";
+
+    private String currentVersion;
+    private String newVersion;
+    private TextView versionTextView;
 
     // shared view model for more info function, used to get the SharedViewModel
     private SharedViewModel sharedViewModel;
+    private boolean isEmailSent = false;
     private byte[] publicKey;
     private static final String PREFS_NAME = "LicenseCheck";
     private static final String FIRST_TIME_KEY = "firstTime";
@@ -105,7 +145,7 @@ public class MainActivity extends AppCompatActivity {
     private CheckBox checkButton;
     public String infoToPrint;
     private String emailBody;
-    private boolean print = false;
+    private boolean enableEmailing = false;
     private boolean checkBoxChecked = false;
     private boolean paymentMethodChecked = false;
     private ActivityMainBinding binding;
@@ -117,6 +157,7 @@ public class MainActivity extends AppCompatActivity {
     private RadioButton lastCheckedRadioButton = null;
     public String[] lines;
     private boolean letPrint = false;
+    private int globalCoutner = 0;
     public NotificationsFragment notificationsFragment;
     public PrinterSdk.Printer sunmiv2sPrinter; // THIS IS FOR PRINTER-POS SUNMI V2S
     String stringHost = "mail.dalamaras.gr";
@@ -127,10 +168,32 @@ public class MainActivity extends AppCompatActivity {
     private static final int NAVIGATION_NOTIFICATIONS_ID = R.id.navigation_notifications;
     private int currentFragmentId = NAVIGATION_HOME_ID;
     public boolean logForm = false;
+
+    private void showSuccessDialog() {
+        // Inflate the dialog layout
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_success_email, null);
+
+        // Create the AlertDialog
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        builder.setView(dialogView);
+        builder.setCancelable(false); // Prevent dialog from being dismissed on outside touch
+
+        // Create and show the dialog
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+        // Optionally, add a delay and then dismiss the dialog automatically
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                dialog.dismiss();
+            }
+        }, 2000); // Dismiss after 2 seconds (adjust as needed)
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -144,8 +207,11 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupWithNavController(binding.navView, navController);
 
         //get saved public key
-        Button insertPublicKey = findViewById(R.id.insertPublicKey);
-        insertPublicKey.setVisibility(View.GONE);
+//        Button insertPublicKey = findViewById(R.id.insertPublicKey);
+//        insertPublicKey.setVisibility(View.GONE);
+
+        versionTextView = findViewById(R.id.versionTextView);
+        versionTextView.setText("Current App Vesion: "+CURRENT_VERSION);
 
 
 
@@ -171,11 +237,22 @@ public class MainActivity extends AppCompatActivity {
 //        rsa = new RSAEncryptor(getApplicationContext());
 
         if (firstTime) {
-            insertPublicKey.setVisibility(View.VISIBLE);
-            insertPublicKey.setOnClickListener(v ->{
-                openFileManager();
-            });
+//            insertPublicKey.setVisibility(View.VISIBLE);
+//            insertPublicKey.setOnClickListener(v ->{
+//                openFileManager();
+//            });
             showFirstTimeDialog(settings);
+        }
+
+        if (!firstTime) {
+            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    != PackageManager.PERMISSION_GRANTED) {
+                // Request the permission
+                ActivityCompat.requestPermissions(this,
+                        new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSION_REQUEST_CODE);
+            } else {
+                checkForUpdate();
+            }
         }
 
         //gia to timeout me to license
@@ -232,10 +309,10 @@ public class MainActivity extends AppCompatActivity {
         invoiceButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                receipt = false;
-                invoice = true;
                 invoiceButton.setBackgroundColor(Color.parseColor("#131842"));
                 showVATDialog();
+                invoice = true;
+                receipt = false;
                 receiptButton.setBackgroundColor(GRAY);
             }
         });
@@ -365,7 +442,7 @@ public class MainActivity extends AppCompatActivity {
                 logForm = true;
                 if (getDataSendData()) {
                     if (sharedPreferences.getBoolean(notificationsFragment.KEY_ENABLE_PRINTING, false)) {
-                        print = false;
+                        enableEmailing = false;
                         getDataSendData();
                         if (sunmiv2sPrinter != null) {
                             printLabel1ForSunmi(1);
@@ -376,7 +453,7 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     if (sharedPreferences.getBoolean(notificationsFragment.KEY_ENABLE_EMAILS, false)) {
-                        print = true;
+                        enableEmailing = true;
                         getDataSendData();
                         // No need to call getDataSendData() again
                         Log.d("DATA", "enabled emailing");
@@ -693,7 +770,6 @@ public class MainActivity extends AppCompatActivity {
 
             // Save changes in background
             new SaveAndSendEmailTask(session, mimeMessage).execute();
-
         } catch (Exception e) {
             Log.e("Email", "Error in sending encrypted email", e);
         }
@@ -704,15 +780,15 @@ public class MainActivity extends AppCompatActivity {
 
     public boolean getDataSendData() {
         try {
-//            String stringSenderEmail = "support@dalamaras.gr";
-//            String stringReceiverEmail = "innovation@dalamaras.gr";
-//            String stringPasswordSenderEmail = "innsup!13";
-
+            globalCoutner++;
+            Log.d("Counter", String.valueOf(globalCoutner));
             SharedPreferences sharedPreferences = getSharedPreferences(notificationsFragment.PREFS_NAME, Context.MODE_PRIVATE);
 
             String stringSenderEmail = sharedPreferences.getString(notificationsFragment.KEY_SENDER_MAIL, "");
             String stringReceiverEmail = sharedPreferences.getString(notificationsFragment.KEY_RECEIVER_MAIL, "");
             String stringPasswordSenderEmail = sharedPreferences.getString(notificationsFragment.KEY_SENDER_PASSWORD, "");
+
+            Log.d("DATA", "enabled emailing1");
 
             if (stringSenderEmail == "" || stringSenderEmail == "" || stringPasswordSenderEmail == ""){
                 return false;
@@ -728,6 +804,8 @@ public class MainActivity extends AppCompatActivity {
             if (smtpHost == "" || port == "" || sslEnable == "" || auth ==""){
                 return false;
             }
+
+            Log.d("DATA", "enabled emailing2");
 
             properties.put("mail.smtp.host", smtpHost);
             properties.put("mail.smtp.port", port);
@@ -746,6 +824,7 @@ public class MainActivity extends AppCompatActivity {
             mimeMessage.setFrom(new InternetAddress(stringSenderEmail));
             mimeMessage.addRecipient(MimeMessage.RecipientType.TO, new InternetAddress(stringReceiverEmail));
 
+            Log.d("DATA", "enabled emailing3");
 
             EditText teFullName = findViewById(R.id.FullNameTextEdit);
             String FullName = teFullName.getText().toString();
@@ -794,6 +873,8 @@ public class MainActivity extends AppCompatActivity {
 
 
 
+            Log.d("DATA", "enabled emailing4");
+
             String emailSubject = "Δελτίο Άφιξης " + formattedDateTime + " " + FullName;
             String emailBody = "Full Name: " + FullName + "\n" +
                     "Street Address: " + StreetAddress + "\n" +
@@ -811,37 +892,41 @@ public class MainActivity extends AppCompatActivity {
             if(invoice){
                 emailBody = emailBody + "Invoice VAT: " + vatNumber +"\n";
                 String documentType = "Invoice VAT: " + vatNumber;
-                if (logForm) {
-                    FormData formData = new FormData(FullName, StreetAddress, ZipCode, Town, Email, PhoneNumber, IdNo, Nationality, formattedDateTime, PaymentType, documentType);
-                    FormStorage.saveForm(this, formData);
-                    logForm = false;
-                }
+//                if (logForm) {
+//                    FormData formData = new FormData(FullName, StreetAddress, ZipCode, Town, Email, PhoneNumber, IdNo, Nationality, formattedDateTime, PaymentType, documentType);
+//                    FormStorage.saveForm(this, formData);
+//                    logForm = false;
+//                }
             } else if (receipt) {
                 emailBody = emailBody + "Document: Receipt" + "\n";
                 String documentType = "Document: Receipt";
-                if (logForm) {
-                    FormData formData = new FormData(FullName, StreetAddress, ZipCode, Town, Email, PhoneNumber, IdNo, Nationality, formattedDateTime, PaymentType, documentType);
-                    FormStorage.saveForm(this, formData);
-                    logForm = false;
-                }
+//                if (logForm) {
+//                    FormData formData = new FormData(FullName, StreetAddress, ZipCode, Town, Email, PhoneNumber, IdNo, Nationality, formattedDateTime, PaymentType, documentType);
+//                    FormStorage.saveForm(this, formData);
+//                    logForm = false;
+//                }
             }
 
 
+            Log.d("DATA", "enabled emailing5");
             infoToPrint = emailBody;
 
 
 
             // Send encrypted email
-            if (print) {
+            if (enableEmailing) {
+                Log.d("DATA", "enabled emailing6 " + enableEmailing);
                 Uri savedUri = getSavedFileUri();
                 if (savedUri != null) {
                     try {
+                        Log.d("DATA", "enabled emailing7");
                         publicKey = readBytesFromUri(savedUri);
                         sendEncryptedEmail(session, stringReceiverEmail, stringSenderEmail, emailBody, emailSubject, publicKey);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                 }
+                enableEmailing = false;
             }
             // Split the email body into smaller chunks
 //            List<String> parts = splitIntoChunks(emailBody, 117); // 117 bytes for 1024-bit RSA with PKCS1 padding
@@ -992,16 +1077,92 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected Void doInBackground(Void... params) {
-            try {
-                Log.d("Email", "Saving changes and sending email in background");
-                mimeMessage.saveChanges();
-                Transport.send(mimeMessage);
-                Log.d("Email", "Email sent successfully");
-            } catch (MessagingException e) {
-                Log.e("Email", "Error in sending email", e);
+            int maxRetries = 3;
+            int attempt = 0;
+            boolean success = false;
+
+            while (attempt < maxRetries && !success) {
+                try {
+                    Log.d("Email", "Saving changes and sending email in background, attempt " + (attempt + 1));
+                    mimeMessage.saveChanges();
+                    Transport.send(mimeMessage);
+                    Log.d("Email", "Email sent successfully");
+                    success = true;
+
+                    // Call showSuccessDialog() on the main thread
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            showSuccessDialog();
+                        }
+                    });
+
+                } catch (MessagingException e) {
+                    Log.e("Email", "Error in sending email, attempt " + (attempt + 1), e);
+                    attempt++;
+                }
             }
+
+            if (!success) {
+                // Call showUnSuccessDialog() on the main thread if all attempts fail
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (!isWifiEnabled(MainActivity.this)){
+                            showClosedWiFiDialog();
+                        }else {
+                            showUnSuccessDialog();
+                        }
+                    }
+                });
+            }
+
             return null;
         }
+    }
+
+    private void showUnSuccessDialog() {
+        // Inflate the dialog layout
+        View dialogView = getLayoutInflater().inflate(R.layout.unsuccesfull_email, null);
+
+        // Create the AlertDialog
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        builder.setView(dialogView);
+        builder.setCancelable(false); // Prevent dialog from being dismissed on outside touch
+
+        // Create and show the dialog
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+        // Optionally, add a delay and then dismiss the dialog automatically
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                dialog.dismiss();
+            }
+        }, 2000); // Dismiss after 2 seconds (adjust as needed)
+    }
+
+    private void showClosedWiFiDialog() {
+        // Inflate the dialog layout
+        View dialogView = getLayoutInflater().inflate(R.layout.unsuccesfull_email_due_to_wifi, null);
+
+        // Create the AlertDialog
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        builder.setView(dialogView);
+        builder.setCancelable(false); // Prevent dialog from being dismissed on outside touch
+
+        // Create and show the dialog
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+        // Optionally, add a delay and then dismiss the dialog automatically
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                dialog.dismiss();
+            }
+        }, 2000); // Dismiss after 2 seconds (adjust as needed)
     }
 
     private List<String> splitIntoChunks(String text, int chunkSize) {
@@ -1021,6 +1182,24 @@ public class MainActivity extends AppCompatActivity {
             // Log other fields as needed
         }
     }
+
+    public boolean isWifiEnabled(Context context) {
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (connectivityManager != null) {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                Network network = connectivityManager.getActiveNetwork();
+                if (network != null) {
+                    NetworkCapabilities capabilities = connectivityManager.getNetworkCapabilities(network);
+                    return capabilities != null && capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI);
+                }
+            } else {
+                NetworkInfo networkInfo = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+                return networkInfo != null && networkInfo.isConnected();
+            }
+        }
+        return false;
+    }
+
 
     void clearSelections(){
         receipt = true;
@@ -1068,4 +1247,115 @@ public class MainActivity extends AppCompatActivity {
         tte = findViewById(R.id.authEnableTextEdit);
         tte.setHint(smtpAuth);
     }
+
+    private void checkForUpdate() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                // Initialize FTP client
+                FTPClient ftpClient = new FTPClient();
+                try {
+                    ftpClient.connect(FTP_SERVER, FTP_PORT);
+                    ftpClient.login(FTP_USER, FTP_PASS);
+                    ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
+                    ftpClient.enterLocalPassiveMode();
+
+                    // Check if version.txt exists on FTP server
+                    String versionFileName = "version.txt";
+                    InputStream versionStream = ftpClient.retrieveFileStream(FTP_REMOTE_DIRECTORY + "/" + versionFileName);
+                    if (versionStream != null) {
+                        String remoteVersion = readVersionFromStream(versionStream);
+                        Log.d(TAG, "Remote version: " + remoteVersion);
+                        Log.d(TAG, "Current version: " + CURRENT_VERSION); // Using custom version string
+
+                        // Compare versions
+                        if (isNewVersionAvailable(remoteVersion, CURRENT_VERSION)) {
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    showUpdateDialog();
+                                }
+                            });
+                        }
+                    } else {
+                        Log.e(TAG, "Failed to retrieve version.txt from FTP server");
+                    }
+
+                    ftpClient.disconnect();
+                } catch (IOException e) {
+                    Log.e(TAG, "Error connecting to FTP server: " + e.getMessage());
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
+
+    private String readVersionFromStream(InputStream inputStream) throws IOException {
+        StringBuilder versionBuilder = new StringBuilder();
+        int data;
+        while ((data = inputStream.read()) != -1) {
+            versionBuilder.append((char) data);
+        }
+        inputStream.close();
+        return versionBuilder.toString().trim();
+    }
+
+    private boolean isNewVersionAvailable(String remoteVersion, String currentVersion) {
+        // Implement version comparison logic here
+        // Assuming version strings are in the format "X.Y.Z"
+        String[] remoteParts = remoteVersion.split("\\.");
+        String[] currentParts = currentVersion.split("\\.");
+
+        for (int i = 0; i < remoteParts.length && i < currentParts.length; i++) {
+            int remote = Integer.parseInt(remoteParts[i]);
+            int current = Integer.parseInt(currentParts[i]);
+
+            if (remote > current) {
+                return true;
+            } else if (remote < current) {
+                return false;
+            }
+            // If equal, check next part
+        }
+
+        // If all parts are equal up to the shortest version string length
+        return false;
+    }
+
+    private void showUpdateDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Update Available");
+        builder.setMessage("An update is available. Do you want to download and install it now?");
+        builder.setPositiveButton("Download", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                // Start the download
+                startOtaUpdate();
+            }
+        });
+        builder.setNegativeButton("Cancel", null);
+        builder.show();
+    }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == PERMISSION_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission granted, start the download
+                startOtaUpdate();
+            } else {
+                // Permission denied, show a message or handle accordingly
+                Toast.makeText(this, "Permission denied. Cannot download file.", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+
+    private void startOtaUpdate() {
+        new UpdateApp(MainActivity.this).execute(fileUrl);
+    }
+
+
 }
