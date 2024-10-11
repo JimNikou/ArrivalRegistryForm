@@ -26,53 +26,156 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <TableRow
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:orientation="vertical">
 
                 <TextView
                     android:id="@+id/textView11"
-                    android:layout_width="180dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="10dp"
+                    android:layout_marginTop="100dp"
                     android:fontFamily="sans-serif-black"
                     android:text="SMTP Host"
                     android:textAlignment="textStart"
-                    android:textSize="20sp" />
+                    android:textSize="20sp"
+                    android:visibility="gone" />
 
                 <EditText
                     android:id="@+id/smtpHostTextEdit"
-                    android:layout_width="231dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="-30dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="10dp"
                     android:layout_marginRight="35dp"
                     android:backgroundTint="#E68369"
                     android:ems="10"
                     android:inputType="text"
                     android:scrollbars="horizontal"
                     android:textColorHint="#E68369"
-                    android:textCursorDrawable="@null" />
-            </TableRow>
+                    android:textCursorDrawable="@null"
+                    android:visibility="gone" />
+            </LinearLayout>
 
-            <TableRow
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:orientation="vertical">
 
                 <TextView
                     android:id="@+id/textView12"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="10dp"
                     android:fontFamily="sans-serif-black"
                     android:text="Port"
                     android:textAlignment="textStart"
-                    android:textSize="20sp" />
+                    android:textSize="20sp"
+                    android:visibility="gone" />
 
                 <EditText
                     android:id="@+id/portTextEdit"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="-30dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="35dp"
+                    android:backgroundTint="#E68369"
+                    android:ems="10"
+                    android:inputType="text"
+                    android:scrollbars="horizontal"
+                    android:textColorHint="#E68369"
+                    android:textCursorDrawable="@null"
+                    android:visibility="gone" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/textView13"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:text="Sender Mail"
+                    android:textAlignment="textStart"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:visibility="gone" />
+
+                <EditText
+                    android:id="@+id/senderMailTextEdit"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="35dp"
+                    android:backgroundTint="#E68369"
+                    android:ems="10"
+                    android:inputType="text"
+                    android:scrollbars="horizontal"
+                    android:textColorHint="#E68369"
+                    android:textCursorDrawable="@null"
+                    android:visibility="gone" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/textView15"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:text="Sender Password"
+                    android:textAlignment="textStart"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:visibility="gone" />
+
+                <EditText
+                    android:id="@+id/senderPasswordTextEdit"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="35dp"
+                    android:backgroundTint="#E68369"
+                    android:ems="10"
+                    android:inputType="text"
+                    android:password="true"
+                    android:scrollbars="horizontal"
+                    android:textColorHint="#E68369"
+                    android:textCursorDrawable="@null"
+                    android:visibility="gone" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/textView17"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginTop="100dp"
+                    android:text="Receiver Mail"
+                    android:textAlignment="textStart"
+                    android:textAllCaps="false"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <EditText
+                    android:id="@+id/receiverMailTextEdit"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
                     android:layout_marginRight="35dp"
                     android:backgroundTint="#E68369"
                     android:ems="10"
@@ -80,7 +183,37 @@
                     android:scrollbars="horizontal"
                     android:textColorHint="#E68369"
                     android:textCursorDrawable="@null" />
-            </TableRow>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/textView9"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:text="GDPR Site Link"
+                    android:textAlignment="textStart"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <EditText
+                    android:id="@+id/GDPReditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="35dp"
+                    android:backgroundTint="#E68369"
+                    android:ems="10"
+                    android:inputType="text"
+                    android:scrollbars="horizontal" />
+
+
+            </LinearLayout>
 
             <TableRow
                 android:layout_width="match_parent"
@@ -94,20 +227,15 @@
                     android:fontFamily="sans-serif-black"
                     android:text="SSL Enable"
                     android:textAlignment="textStart"
-                    android:textSize="20sp" />
+                    android:textSize="20sp"
+                    tools:visibility="gone" />
 
-                <EditText
-                    android:id="@+id/sslTextEdit"
+                <Switch
+                    android:id="@+id/sslSwitch"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="-30dp"
-                    android:layout_marginRight="35dp"
-                    android:backgroundTint="#E68369"
-                    android:ems="10"
-                    android:inputType="text"
-                    android:scrollbars="horizontal"
-                    android:textColorHint="#E68369"
-                    android:textCursorDrawable="@null" />
+                    android:layout_marginRight="200dp"
+                    tools:visibility="gone" />
 
             </TableRow>
 
@@ -124,135 +252,15 @@
                     android:textAlignment="textStart"
                     android:textAllCaps="false"
                     android:textSize="20sp"
-                    android:textStyle="bold" />
-
-                <EditText
-                    android:id="@+id/authEnableTextEdit"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="-30dp"
-                    android:layout_marginRight="35dp"
-                    android:backgroundTint="#E68369"
-                    android:ems="10"
-                    android:inputType="text"
-                    android:scrollbars="horizontal"
-                    android:textColorHint="#E68369"
-                    android:textCursorDrawable="@null" />
-            </TableRow>
-
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <TextView
-                    android:id="@+id/textView13"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="10dp"
-                    android:text="Sender Mail"
-                    android:textAlignment="textStart"
-                    android:textSize="20sp"
-                    android:textStyle="bold" />
-
-                <EditText
-                    android:id="@+id/senderMailTextEdit"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="-30dp"
-                    android:layout_marginRight="35dp"
-                    android:backgroundTint="#E68369"
-                    android:ems="10"
-                    android:inputType="text"
-                    android:scrollbars="horizontal"
-                    android:textColorHint="#E68369"
-                    android:textCursorDrawable="@null" />
-
-            </TableRow>
-
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <TextView
-                    android:id="@+id/textView15"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="10dp"
-                    android:text="Sender Password"
-                    android:textAlignment="textStart"
-                    android:textSize="20sp"
-                    android:textStyle="bold" />
-
-                <EditText
-                    android:id="@+id/senderPasswordTextEdit"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="-30dp"
-                    android:layout_marginRight="35dp"
-                    android:backgroundTint="#E68369"
-                    android:ems="10"
-                    android:inputType="text"
-                    android:scrollbars="horizontal"
-                    android:textColorHint="#E68369"
-                    android:textCursorDrawable="@null" />
-
-            </TableRow>
-
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <TextView
-                    android:id="@+id/textView17"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="10dp"
-                    android:text="Receiver Mail"
-                    android:textAlignment="textStart"
-                    android:textAllCaps="false"
-                    android:textSize="20sp"
-                    android:textStyle="bold" />
-
-                <EditText
-                    android:id="@+id/receiverMailTextEdit"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="-30dp"
-                    android:layout_marginRight="35dp"
-                    android:backgroundTint="#E68369"
-                    android:ems="10"
-                    android:inputType="text"
-                    android:scrollbars="horizontal"
-                    android:textColorHint="#E68369"
-                    android:textCursorDrawable="@null" />
-
-            </TableRow>
-
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" >
-
-                <TextView
-                    android:id="@+id/textView9"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="GDPR Site Link"
-                    android:textAlignment="textStart"
-                    android:textSize="20sp"
                     android:textStyle="bold"
-                    android:layout_marginLeft="10dp" />
+                    tools:visibility="gone" />
 
-                <EditText
-                    android:id="@+id/GDPReditText"
+                <Switch
+                    android:id="@+id/authSwitch"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="-30dp"
-                    android:layout_marginRight="35dp"
-                    android:backgroundTint="#E68369"
-                    android:ems="10"
-                    android:inputType="text"
-                    android:scrollbars="horizontal" />
-
+                    android:layout_marginRight="200dp"
+                    tools:visibility="gone" />
 
             </TableRow>
 
@@ -285,6 +293,91 @@
                     android:textColorLink="#E68369"
                     android:textCursorDrawable="@null" />
             </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <Switch
+                    android:id="@+id/defaultThankYouEmailSwitch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="95dp"
+                    android:layout_span="2"
+                    android:text="Default &quot;Thank You&quot; Email To Customer" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:id="@+id/textView23"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:text="Hotel Name"
+                    android:textAlignment="textStart"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <EditText
+                    android:id="@+id/hotelName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="95dp"
+                    android:layout_span="2"
+                    android:backgroundTint="#E68369"
+                    android:ems="10"
+                    android:hint="Enter your Hotel Name"
+                    android:inputType="text" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <EditText
+                    android:id="@+id/editTextCustomerMailTittle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_column="0"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="95dp"
+                    android:layout_span="2"
+                    android:backgroundTint="#E68369"
+                    android:ems="10"
+                    android:hint="Customer Mail Subject"
+                    android:inputType="textMultiLine"
+                    android:maxLines="2" />
+
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <EditText
+                    android:id="@+id/editTextCustomerBody"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="95dp"
+                    android:layout_span="2"
+                    android:backgroundTint="#E68369"
+                    android:ems="10"
+                    android:hint="Customer Mail Body"
+                    android:inputType="textMultiLine"
+                    android:minHeight="120dp" />
+            </TableRow>
+
             <TableRow
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
@@ -295,7 +388,7 @@
                     android:layout_height="wrap_content"
                     android:layout_column="0"
                     android:layout_marginLeft="10dp"
-                    android:layout_marginRight="95dp"
+                    android:layout_marginRight="105dp"
                     android:layout_span="2"
                     android:backgroundTint="#0DDD0F"
                     android:maxLines="2"
@@ -314,7 +407,9 @@
                     android:layout_marginLeft="10dp"
                     android:layout_marginTop="10dp"
                     android:layout_marginRight="5dp"
+                    android:paddingLeft="10dp"
                     android:paddingTop="4dp"
+                    android:paddingRight="10dp"
                     android:text="Change Password" />
 
                 <Button
@@ -323,7 +418,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="0dp"
                     android:layout_marginTop="10dp"
-                    android:layout_marginRight="95dp"
+                    android:layout_marginRight="105dp"
                     android:text="Add Public Key" />
 
             </TableRow>

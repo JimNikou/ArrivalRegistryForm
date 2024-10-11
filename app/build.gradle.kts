@@ -12,7 +12,7 @@ android {
         minSdk = 26
         targetSdk = 34
         versionCode = 1
-        versionName = "1.0"
+        versionName = "0.1.9"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -45,11 +45,10 @@ android {
     buildFeatures {
         viewBinding = true
     }
-
     packagingOptions {
-        exclude("META-INF/NOTICE.md")
-        exclude("META-INF/LICENSE.md")
-        exclude("META-INF/DEPENDENCIES")
+        resources {
+            excludes += setOf("META-INF/NOTICE.md", "META-INF/LICENSE.md", "META-INF/DEPENDENCIES")
+        }
     }
 }
 
@@ -98,7 +97,12 @@ dependencies {
     implementation("commons-net:commons-net:3.6")
 
     implementation("androidx.work:work-runtime:2.7.1")
-    implementation("com.amitshekhar.android:android-networking:1.0.2")
+
+    //SOS HERE
+//    implementation("com.amitshekhar.android:android-networking:1.0.2") TO EBGALA GT DEN DOULEUE TO APP OLOKLHRO DEN EKANE BUILD
+    // na balw auto mesa sta quotes ean den douleuei kapoio function "com.github.amitshekhariitbhu.Fast-Android-Networking:android-networking:v1.0.2"
+
+
 
 //    implementation("com.github.amitshekhariitbhu.Fast-Android-Networking:android-networking:v1.0.2")
 

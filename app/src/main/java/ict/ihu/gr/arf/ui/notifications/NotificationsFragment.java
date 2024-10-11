@@ -11,6 +11,8 @@ import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.InputType;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -50,9 +52,24 @@ public class NotificationsFragment extends Fragment {
     private EditText senderPasswordTextEdit;
     private EditText receiverMailTextEdit;
     private EditText linkGPDR;
+    private EditText editTextBody;
 
+    private EditText hotelNameString;
+    private EditText editTextMailTittle;
+
+    private Switch sslSwitch;
+    private Switch authSwitch;
+    private Switch defaultEmailThanks;
+
+    private String emailBodyStandard;
+    private String emailTittleStandard;
     public static final String PREFS_NAME = "MyAppPrefs";
     public static final String KEY_SMTP_HOST = "smtpHost";
+
+    public static final String EMAIL_BODY = "emailBody";
+    public static final String THANK_YOU_EMAIL = "thankYouEmail";
+    public static final String EMAIL_TITTLE = "emailTittle";
+    public static final String HOTEL_NAME = "hotelName";
     public static final String KEY_PORT = "port";
     public static final String KEY_SSL = "ssl";
     public static final String KEY_AUTH_ENABLE = "authEnable";
@@ -61,6 +78,8 @@ public class NotificationsFragment extends Fragment {
     public static final String KEY_RECEIVER_MAIL = "receiverMail";
     public static final String KEY_ENABLE_PRINTING = "enablePrinting";
     public static final String KEY_ENABLE_EMAILS = "enableEmails";
+    public static final String SSL_SWITCH = "enableSSL";
+    public static final String AUTH_SWITCH = "enableAUTH";
     public static final String KEY_GPDR = "linkGPDR";
 
     private String tempPrint, tempEmailing;
@@ -102,21 +121,26 @@ public class NotificationsFragment extends Fragment {
         enableEmails = root.findViewById(R.id.enableEmails);
         smtpHostTextEdit = root.findViewById(R.id.smtpHostTextEdit);
         portTextEdit = root.findViewById(R.id.portTextEdit);
-        sslTextEdit = root.findViewById(R.id.sslTextEdit);
-        authEnableTextEdit = root.findViewById(R.id.authEnableTextEdit);
+//        sslTextEdit = root.findViewById(R.id.sslTextEdit);
+//        authEnableTextEdit = root.findViewById(R.id.authEnableTextEdit);
         senderMailTextEdit = root.findViewById(R.id.senderMailTextEdit);
         senderPasswordTextEdit = root.findViewById(R.id.senderPasswordTextEdit);
         receiverMailTextEdit = root.findViewById(R.id.receiverMailTextEdit);
         linkGPDR = root.findViewById(R.id.GDPReditText);
+        sslSwitch = root.findViewById(R.id.sslSwitch);
+        authSwitch = root.findViewById(R.id.authSwitch);
+        editTextMailTittle = root.findViewById(R.id.editTextCustomerMailTittle);
+        editTextBody = root.findViewById(R.id.editTextCustomerBody);
+        hotelNameString = root.findViewById(R.id.hotelName);
+        defaultEmailThanks = root.findViewById(R.id.defaultThankYouEmailSwitch);
 
-
-        if (smtpHostTextEdit == null || portTextEdit == null || sslTextEdit == null ||
-                authEnableTextEdit == null || senderMailTextEdit == null || senderPasswordTextEdit == null ||
+        if (smtpHostTextEdit == null || portTextEdit == null || senderMailTextEdit == null || senderPasswordTextEdit == null ||
                 receiverMailTextEdit == null || linkGPDR == null) {
             throw new RuntimeException("Failed to initialize one or more EditTexts");
         }
 
         loadPreferences(); //loading from memory
+
 
         Button buttonShowGuide = root.findViewById(R.id.howToUseButton);
         buttonShowGuide.setOnClickListener(new View.OnClickListener() {
@@ -161,6 +185,37 @@ public class NotificationsFragment extends Fragment {
             }
         });
 
+        defaultEmailThanks.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                SharedPreferences sharedPreferences = getActivity().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putBoolean(THANK_YOU_EMAIL, defaultEmailThanks.isChecked());
+                editor.apply();
+            }
+        });
+
+        sslSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                SharedPreferences sharedPreferences = getActivity().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putBoolean(SSL_SWITCH, sslSwitch.isChecked());
+                editor.putBoolean(AUTH_SWITCH, authSwitch.isChecked());
+                editor.apply();
+            }
+        });
+
+        authSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                SharedPreferences sharedPreferences = getActivity().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putBoolean(SSL_SWITCH, sslSwitch.isChecked());
+                editor.putBoolean(AUTH_SWITCH, authSwitch.isChecked());
+                editor.apply();
+            }
+        });
         enablePrinting.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -254,12 +309,15 @@ public class NotificationsFragment extends Fragment {
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         smtpHostTextEdit.setText(sharedPreferences.getString(KEY_SMTP_HOST, ""));
         portTextEdit.setText(sharedPreferences.getString(KEY_PORT, ""));
-        sslTextEdit.setText(sharedPreferences.getString(KEY_SSL, ""));
-        authEnableTextEdit.setText(sharedPreferences.getString(KEY_AUTH_ENABLE, ""));
+//        sslTextEdit.setText(sharedPreferences.getString(KEY_SSL, ""));
+//        authEnableTextEdit.setText(sharedPreferences.getString(KEY_AUTH_ENABLE, ""));
         senderMailTextEdit.setText(sharedPreferences.getString(KEY_SENDER_MAIL, ""));
         senderPasswordTextEdit.setText(sharedPreferences.getString(KEY_SENDER_PASSWORD, ""));
         receiverMailTextEdit.setText(sharedPreferences.getString(KEY_RECEIVER_MAIL, ""));
         linkGPDR.setText(sharedPreferences.getString(KEY_GPDR, ""));
+        hotelNameString.setText(sharedPreferences.getString(HOTEL_NAME, ""));
+        editTextMailTittle.setText(sharedPreferences.getString(EMAIL_TITTLE,""));
+        editTextBody.setText(sharedPreferences.getString(EMAIL_BODY,""));
     }
 
     private void showTextDialog(Context context, String longText) {
@@ -343,16 +401,47 @@ public class NotificationsFragment extends Fragment {
 
         editor.putString(KEY_SMTP_HOST, smtpHostTextEdit.getText().toString());
         editor.putString(KEY_PORT, portTextEdit.getText().toString());
-        editor.putString(KEY_SSL, sslTextEdit.getText().toString());
-        editor.putString(KEY_AUTH_ENABLE, authEnableTextEdit.getText().toString());
+//        editor.putString(KEY_SSL, sslTextEdit.getText().toString());
+//        editor.putString(KEY_AUTH_ENABLE, authEnableTextEdit.getText().toString());
         editor.putString(KEY_SENDER_MAIL, senderMailTextEdit.getText().toString());
         editor.putString(KEY_SENDER_PASSWORD, senderPasswordTextEdit.getText().toString());
         editor.putString(KEY_RECEIVER_MAIL, receiverMailTextEdit.getText().toString());
         editor.putBoolean(KEY_ENABLE_PRINTING, enablePrinting.isChecked());
         editor.putBoolean(KEY_ENABLE_EMAILS, enableEmails.isChecked());
+        editor.putBoolean(SSL_SWITCH, sslSwitch.isChecked());
+        editor.putBoolean(AUTH_SWITCH, authSwitch.isChecked());
+        editor.putBoolean(THANK_YOU_EMAIL, defaultEmailThanks.isChecked());
         editor.putString(KEY_GPDR, linkGPDR.getText().toString());
+        editor.putString(HOTEL_NAME, hotelNameString.getText().toString());
+
+        Log.d("Hotel", hotelNameString.getText().toString());
+        // Create standard email title and body
+        String emailTittleStandard = "Thank you for checking in at " + hotelNameString.getText().toString().trim();
+        String emailBodyStandard = "This email informs you that you have successfully checked in at our hotel and also that you" +
+                " have accepted our GDPR Policy. Thank you for choosing our hotel.";
+
+        // Log the strings and their lengths for debugging
+        Log.d("Hotel", "emailBodyStandard: " + emailBodyStandard + " | Length: " + emailBodyStandard.length());
+        Log.d("Hotel", "EditText Body: " + editTextBody.getText().toString().trim() + " | Length: " + editTextBody.getText().toString().trim().length());
+
+        // Compare the trimmed strings
+        if (defaultEmailThanks.isChecked()) {
+            editor.putString(EMAIL_BODY, emailBodyStandard);
+            editor.putString(EMAIL_TITTLE, emailTittleStandard);
+            Log.d("Hotel", "here 1");
+        } else {
+            Log.d("Hotel", "here 2");
+            editor.putString(EMAIL_BODY, editTextBody.getText().toString().trim());
+            editor.putString(EMAIL_TITTLE, editTextMailTittle.getText().toString().trim());
+        }
+
+
+
 
         editor.apply();
+    }
+    private boolean isEditTextEmpty(EditText editText) {
+        return TextUtils.isEmpty(editText.getText().toString().trim());
     }
 
     private void loadPreferences() {
@@ -366,8 +455,11 @@ public class NotificationsFragment extends Fragment {
 //        senderPasswordTextEdit.setText(sharedPreferences.getString(KEY_SENDER_PASSWORD, ""));
 //        receiverMailTextEdit.setText(sharedPreferences.getString(KEY_RECEIVER_MAIL, ""));
 
+        sslSwitch.setChecked(sharedPreferences.getBoolean(SSL_SWITCH, false));
+        authSwitch.setChecked(sharedPreferences.getBoolean(AUTH_SWITCH, false));
         enablePrinting.setChecked(sharedPreferences.getBoolean(KEY_ENABLE_PRINTING, false));
         enableEmails.setChecked(sharedPreferences.getBoolean(KEY_ENABLE_EMAILS, false));
+        defaultEmailThanks.setChecked(sharedPreferences.getBoolean(THANK_YOU_EMAIL, false));
 
     }
 
